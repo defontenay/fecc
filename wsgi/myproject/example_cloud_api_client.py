@@ -1,0 +1,14 @@
+import requests
+
+session = requests.Session()
+url='http://127.0.0.1:8000/poll'
+print "getting ",url
+while True:
+    response = session.get(url)
+    body = response.text
+    print body
+
+
+
+
+

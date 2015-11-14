@@ -15,7 +15,17 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from django.contrib import admin
+from myproject import main
 
 urlpatterns = [
-    url(r'^admin/', include(admin.site.urls)),
+               url(r'^admin/', include(admin.site.urls)),
+               url(r'^poll', main.serve_poll),
+               url(r'^left', main.left),
+               url(r'^right', main.right),
+               url(r'^in', main.zin),
+               url(r'^out', main.out),
+               url(r'^up', main.up),
+               url(r'^down', main.down),
+               url(r'^pc', main.pc),
+               url(r'^', main.serve_blank)
 ]
