@@ -58,8 +58,7 @@ set_var = None
 def serve_poll(request):
     global set_var
     while (set_var == None):
-        sleep(0.01)
-    response = set_var
+        response = set_var
     set_var = None
     return HttpResponse(response)
 
