@@ -4,6 +4,7 @@ import json
 import random
 from  time import sleep
 import datetime
+import threading
 from django.http import HttpResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET
@@ -53,20 +54,23 @@ page = '<!DOCTYPE html> \
 </html> '
 
 set_var = None
+flag = threading.Event()
 
 ###############################################################################
 def serve_poll(request):
-    global set_var
-    while (set_var == None):
-        response = set_var
-    set_var = None
+    global set_var, flag
+#    while (set_var == None):
+    flag.wait()
+    response = set_var
+    flag.clear()
     return HttpResponse(response)
 
 ##############################################################################
 
 def perform(command):
-    global set_var
+    global set_var,flag
     set_var = command
+    flag.set()
     return
 
 def left(request):
