@@ -53,15 +53,16 @@ page = '<!DOCTYPE html> \
 </body>\
 </html> '
 
-set_var = None
+set_var = " "
 flag = threading.Event()
 
 ###############################################################################
 def serve_poll(request):
     global set_var, flag
 #    while (set_var == None):
-    flag.wait()
+    flag.wait(10)
     response = set_var
+    set_var = "."
     flag.clear()
     return HttpResponse(response)
 
