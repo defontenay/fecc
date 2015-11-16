@@ -59,14 +59,12 @@ flag = threading.Event()
 ###############################################################################
 def serve_poll(request):
     global set_var, flag
-    flag.clear()
-    if set_var != ".":
-        response = set_var
-        set_var = "."
-    else:
+    if set_var == ".":
+        flag.clear()
         flag.wait(20)
-        response = set_var
-        set_var = "."
+    response = set_var
+    set_var = "."
+    flag.clear()
     return HttpResponse(response)
 
 ##############################################################################
