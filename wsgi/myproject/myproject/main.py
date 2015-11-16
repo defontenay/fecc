@@ -43,7 +43,7 @@ page = '<!DOCTYPE html> \
 \
 <tr> \
 <td> <form method="get" action="/in"> <button type="submit">IN</button></form> </td> \
-<td> <form method="get" action="/content"> <button type="submit">PC</button></form> </td> \
+<td> <form method="get" action="/pc"> <button type="submit">PC</button></form> </td> \
 <td> <form method="get" action="/out"> <button type="submit">OUT</button></form> </td> \
 </tr> \
 \
@@ -58,10 +58,9 @@ flag = threading.Event()
 
 ###############################################################################
 def serve_poll(request):
-    global set_var, flag
+    global set_var
     if set_var == ".":
-        flag.clear()
-        flag.wait(20)
+        flag.wait(5.3)
     response = set_var
     set_var = "."
     flag.clear()
@@ -70,7 +69,7 @@ def serve_poll(request):
 ##############################################################################
 
 def perform(command):
-    global set_var,flag
+    global set_var
     set_var = command
     flag.set()
     return
