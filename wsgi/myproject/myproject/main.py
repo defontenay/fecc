@@ -1,15 +1,6 @@
 
 import requests
-import json
-import random
-from  time import sleep
-import datetime
-import threading
-import socket
 from django.http import HttpResponse, Http404
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_GET
-
 
 
 page = '<!DOCTYPE html> \
@@ -55,57 +46,20 @@ page = '<!DOCTYPE html> \
 </html> '
 
 set_var = "."
-flag = threading.Event()
 
-
-HOST = '127.0.0.1'      # Symbolic name meaning the local host
-PORT = 50007            # Arbitrary non-privileged port
-addr = None
-conn = None
-
-
-def listener():
-    global addr, conn
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.bind((HOST, PORT))
-    s.listen(1)
-    running = True
-
-    print "Hello world"
-
-    while running:
-        print "Waiting for connection"
-        conn, addr = s.accept()
-        print 'Connected by', addr
-        try:
-            data = conn.recv(1024)
-        except:
-            print "excepyion"
-            conn.close()
-        print "done"
-        addr = None
-
-thread = threading.Thread(target=listener)
-thread.start()
 
 ###############################################################################
 def serve_poll(request):
     global set_var
-    if set_var == ".":
-        flag.wait(5.3)
     response = set_var
     set_var = "."
-    flag.clear()
     return HttpResponse(response)
 
 ##############################################################################
 
 def perform(command):
     global set_var
-    if addr != None:
-        conn.send(command)
     set_var = command
-    flag.set()
     return
 
 def left(request):
