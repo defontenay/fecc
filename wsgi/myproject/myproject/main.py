@@ -1,5 +1,7 @@
 
+import json
 import requests
+import datetime
 from django.http import HttpResponse, Http404
 
 
@@ -94,6 +96,27 @@ def pc(request):
 
 def serve_blank(request):
     return  HttpResponse(page)
+
+def email(request):
+    #whole_body = json.loads(request.body)
+    ##json_log(whole_body," whole body")
+    #to = whole_body['to']
+    #att = whole_body['attachments']
+    #print to, "sent ", att
+    return  HttpResponse("")
+
+def json_log(logdata,header=""):
+    log = open(LOGFILE, 'a')
+    log.write(str(datetime.datetime.now())+"  "+header+" ---------------------------------\n")
+    log.write(json.dumps(logdata, sort_keys=True, indent=4, separators=(',', ': ')))
+    if "static" in LOGFILE:
+        print datetime.datetime.now(), "  ",header," ---------------------------------\n"
+        print json.dumps(logdata, sort_keys=True, indent=4, separators=(',', ': '))
+    log.write("\n")
+    log.close()
+    return 0
+    
+    
 
 
 

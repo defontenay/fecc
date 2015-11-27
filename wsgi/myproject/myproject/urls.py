@@ -27,5 +27,6 @@ urlpatterns = [
                url(r'^up', main.up),
                url(r'^down', main.down),
                url(r'^pc', main.pc),
+               url(r'^email', main.email),
                url(r'^', main.serve_blank)
 ]

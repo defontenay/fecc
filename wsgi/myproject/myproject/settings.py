@@ -114,3 +114,9 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(WSGI_DIR, 'static')
+
+try:
+    LOGFILE = os.path.join(os.environ['OPENSHIFT_PYTHON_LOG_DIR'], "fecc.txt")
+except:
+    LOGFILE = STATIC_ROOT + '/fecc.txt'
+
