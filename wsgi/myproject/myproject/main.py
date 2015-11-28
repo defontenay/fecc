@@ -110,6 +110,7 @@ def email(request):
         json_log(whole_body," whole body")
     except Exception, e:
         print "Exception"
+        print e.message
         return  HttpResponse(e.message)
     return HttpResponse()
 
