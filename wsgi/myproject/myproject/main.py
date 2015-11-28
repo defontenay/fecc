@@ -102,26 +102,32 @@ def serve_blank(request):
 @csrf_exempt
 def email(request):
     
+    log ("","New email received")
     if request.method != 'POST':
         return HttpResponse('Invalid method')
     
     try:
-        print request.body
-        whole_body = json.loads(request.json)
-        json_log(whole_body," whole body")
+        data = request.GET.copy()
+        att = data.get('attachments')
+        fr = data.get('from')
+        sub = data.get('subject')
+        too =data.get('to')
+        log(request.body," whole body")
+
+
     except Exception, e:
         print "Exception"
         print e.message
         return  HttpResponse(e.message)
     return HttpResponse()
 
-def json_log(logdata,header=""):
+def log(logdata,header=""):
     log = open(LOGFILE, 'a')
     log.write(str(datetime.datetime.now())+"  "+header+" ---------------------------------\n")
-    log.write(json.dumps(logdata, sort_keys=True, indent=4, separators=(',', ': ')))
-    #if "static" in LOGFILE:
-    print datetime.datetime.now(), "  ",header," ---------------------------------\n"
-    print json.dumps(logdata, sort_keys=True, indent=4, separators=(',', ': '))
+    if "static" in LOGFILE:
+        print "------------",header
+        print logdata
+    log.write(logdata)
     log.write("\n")
     log.close()
     return 0
