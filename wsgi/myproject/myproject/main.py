@@ -106,13 +106,12 @@ def email(request):
         return HttpResponse('Invalid method')
     
     try:
-        print request.body
         whole_body = json.loads(request.body)
         json_log(whole_body," whole body")
     except Exception, e:
         print "Exception"
         return  HttpResponse(e.message)
-    HttpResponse()
+    return HttpResponse()
 
 def json_log(logdata,header=""):
     log = open(LOGFILE, 'a')
