@@ -3,6 +3,8 @@ import json
 import requests
 import datetime
 from django.http import HttpResponse, Http404
+from django.views.decorators.csrf import csrf_exempt
+from settings import LOGFILE, STATIC_ROOT
 
 
 page = '<!DOCTYPE html> \
@@ -97,21 +99,28 @@ def pc(request):
 def serve_blank(request):
     return  HttpResponse(page)
 
+@csrf_exempt
 def email(request):
-    #whole_body = json.loads(request.body)
-    ##json_log(whole_body," whole body")
-    #to = whole_body['to']
-    #att = whole_body['attachments']
-    #print to, "sent ", att
-    return  HttpResponse("")
+    
+    if request.method != 'POST':
+        return HttpResponse('Invalid method')
+    
+    try:
+        print request.body
+        whole_body = json.loads(request.body)
+        json_log(whole_body," whole body")
+    except Exception, e:
+        print "Exception"
+        return  HttpResponse(e.message)
+    HttpResponse()
 
 def json_log(logdata,header=""):
     log = open(LOGFILE, 'a')
     log.write(str(datetime.datetime.now())+"  "+header+" ---------------------------------\n")
     log.write(json.dumps(logdata, sort_keys=True, indent=4, separators=(',', ': ')))
-    if "static" in LOGFILE:
-        print datetime.datetime.now(), "  ",header," ---------------------------------\n"
-        print json.dumps(logdata, sort_keys=True, indent=4, separators=(',', ': '))
+    #if "static" in LOGFILE:
+    print datetime.datetime.now(), "  ",header," ---------------------------------\n"
+    print json.dumps(logdata, sort_keys=True, indent=4, separators=(',', ': '))
     log.write("\n")
     log.close()
     return 0
