@@ -99,6 +99,7 @@ def pc(request):
 def serve_blank(request):
     return  HttpResponse(page)
 
+
 @csrf_exempt
 def email(request):
     
@@ -107,16 +108,16 @@ def email(request):
         return HttpResponse('Invalid method')
     
     try:
-        data = request.GET.copy()
-        att = data.get('attachments',7)
-        env  = data.get('envelope',None)
+        data = request.POST.copy()
+        print data
+        att = data['attachments']
+        env  = data['envelope']
         sub = data.get('subject',"Blank")
-        string = " ATT: "+ str(att)+ " subject: "+sub
-        print "string ",string
+        string = " ATT: "+ str(att)+ " ```````````````````````````````````subject: "+sub
         json_log(env, string)
         if att > 0:
             info = data.get('attachment-info')
-            jsone_log(info)
+            json_log(info)
             for x in range(1,att+1):
                 name = "attachment"+str(x)
                 file = info[name]
