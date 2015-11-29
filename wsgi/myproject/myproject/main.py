@@ -102,17 +102,28 @@ def serve_blank(request):
 @csrf_exempt
 def email(request):
     
-    log ("","New email received")
+    log ("New email received")
     if request.method != 'POST':
         return HttpResponse('Invalid method')
     
     try:
         data = request.GET.copy()
-        att = data.get('attachments')
-        fr = data.get('from')
-        sub = data.get('subject')
-        too =data.get('to')
-        log(request.body," whole body")
+        att = data.get('attachments',7)
+        env  = data.get('envelope',None)
+        sub = data.get('subject',"Blank")
+        string = " ATT: "+ str(att)+ " subject: "+sub
+        print "string ",string
+        json_log(env, string)
+        if att > 0:
+            info = data.get('attachment-info')
+            jsone_log(info)
+            for x in range(1,att+1):
+                name = "attachment"+str(x)
+                file = info[name]
+                if "ics" in file['type']:
+                    ics = data.get(name)
+                    break;
+            log ("found an ICS .... "+file['name']+" size "+str(len(ics)))
 
 
     except Exception, e:
@@ -121,20 +132,29 @@ def email(request):
         return  HttpResponse(e.message)
     return HttpResponse()
 
+###############################################################################
+
 def log(logdata,header=""):
     log = open(LOGFILE, 'a')
-    log.write(str(datetime.datetime.now())+"  "+header+" ---------------------------------\n")
     if "static" in LOGFILE:
-        print "------------",header
         print logdata
     log.write(logdata)
     log.write("\n")
     log.close()
     return 0
     
-    
 
 
+def json_log(logdata,header=""):
+    log = open(LOGFILE, 'a')
+    log.write(str(datetime.datetime.now())+"  "+header+" ---------------------------------\n")
+    log.write(json.dumps(logdata, sort_keys=True, indent=4, separators=(',', ': ')))
+    if "static" in LOGFILE:
+        print datetime.datetime.now(), "  ",header," ---------------------------------\n"
+        print json.dumps(logdata, sort_keys=True, indent=4, separators=(',', ': '))
+    log.write("\n")
+    log.close()
+    return 0
 
 
 
