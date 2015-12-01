@@ -162,8 +162,11 @@ def email(request):
         if "static" in LOGFILE:
             data = json.loads(request.body)
         else:
+            log ("COPYING POST DATA")
             data = request.POST.copy()
+            log ("DONE")
         att = data.get('attachments',0)
+        log ("ATT IS "+str(att))
         env  = data['envelope']
         sub = data.get('subject',"*****")
         string = " attachments: "+ str(att)+ " subject: "+sub
@@ -177,6 +180,7 @@ def email(request):
                 if "ics" in file['type']:
                     ics = data.get(name)
                     break;
+
             log ("found an ICS .... "+file['name']+" size "+str(len(ics)))
 
 
