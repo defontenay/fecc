@@ -176,6 +176,7 @@ def email(request):
         string = " attachments: "+att+ " subject: "+sub
         log(string)
         att = int(att)
+        print data
         json_log(env,"ENVELOPE")
         if att > 0:
             info = json.loads(data.get('attachment-info'))

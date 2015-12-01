@@ -7,7 +7,7 @@ import json
 
 email = \
     {'text': "body of email",
-    'attachments': 2,
+    'attachments': "2",
     'subject': "hello world",
     'permanent': False,
     'envelope': '{"to":["william.macdonald@starleaf.com"],"from":"messenger@webex.com"}',
