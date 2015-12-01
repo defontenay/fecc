@@ -180,8 +180,11 @@ def email(request):
             info = json.loads(data.get('attachment-info'))
             json_log(info,"ATTCHMENTS")
             for x in range(1,att+1):
+                log (str(x))
                 name = "attachment"+str(x)
+                log (name)
                 file = info[name]
+                json_log(file,"FILE")
                 if "ics" in file['type']:
                     ics = data.get(name)
                     break;
