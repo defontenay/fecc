@@ -171,14 +171,14 @@ def email(request):
         else:
             data = request.POST.copy()
         att = data.get('attachments',0)
-        env  = data['envelope']
+        env  = json.loads(data['envelope'])
         sub = data.get('subject',"*****")
         string = " attachments: "+ " subject: "+sub
         log(string)
         json_log(env,"ENVELOPE")
         if att > 0:
-            info = data.get('attachment-info')
-            json_log(info)
+            info = json.loads(data.get('attachment-info'))
+            json_log(info,"ATTCHMENTS")
             for x in range(1,att+1):
                 name = "attachment"+str(x)
                 file = info[name]
@@ -202,7 +202,7 @@ def email(request):
                 if uri == None:
                     uri = getGenericURI(event.get('DESCRIPTION'))
                 if uri == None:
-                      return HttpResponse("Npo URI found")
+                      return HttpResponse("No URI found")
                 
                 settings = {
                         'title':event.get('SUMMARY'),
