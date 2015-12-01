@@ -176,7 +176,6 @@ def email(request):
         string = " attachments: "+att+ " subject: "+sub
         log(string)
         att = int(att)
-        print data
         json_log(env,"ENVELOPE")
         if att > 0:
             info = json.loads(data.get('attachment-info'))
@@ -188,7 +187,8 @@ def email(request):
                 file = info[name]
                 json_log(file,"FILE")
                 if "ics" in file['type']:
-                    ics = data.get(name)
+                    ics_file = request.files.get(name)
+                    ics = ics_file.read()
                     break;
 
             log ("found an ICS .... "+file['name']+" size "+str(len(ics)))
