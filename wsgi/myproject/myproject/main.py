@@ -114,22 +114,29 @@ def serve_blank(request):
 def getBluejeansURI(description):
     match = re.search('Enter Meeting ID: ([0-9]{9,18})\s', description)
     if not match:
-        raise InvalidIcs('Could not extract URI from ICS')
+        return None
     return match.group(1) + '@bjn.vc'
 
 
 def getWebexURI(description):
     match = re.search('sip:([0-9]{9,18}@[a-zA-Z0-9-.]{0,62}?)\s', description)
     if not match:
-        raise InvalidIcs('Could not extract URI from ICS')
+        return None
     return match.group(1)
 
 
-def getWebexURI(description):
-    match = re.search('([0-9]{9,18}@[a-zA-Z0-9-.]{0,62}?)\s', description)
-    if not match:
-        raise InvalidIcs('Could not extract URI from ICS')
-    return match.group(1)
+def getGenericURI(description):
+    match = re.search('sip:\s*([0-9]{9,18}@[a-zA-Z0-9-.]{0,62}?)\s', description)
+    if match:
+        return match.group(1)
+    match = re.search('([0-9]{4,18}@[a-zA-Z0-9-.]{0,62}?)\s', description)
+    if match:
+        return match.group(1)
+    match = re.search('sip:([a-zA-Z0-9-.+_]{4,64}@[a-zA-Z0-9-.]{0,62}?)\s', description)
+    if match:
+        return match.group(1)
+    return None
+
 
 
 def getTimezone(timezone):
@@ -162,15 +169,13 @@ def email(request):
         if "static" in LOGFILE:
             data = json.loads(request.body)
         else:
-            log ("COPYING POST DATA")
             data = request.POST.copy()
-            log ("DONE")
         att = data.get('attachments',0)
-        log ("ATT IS "+str(att))
         env  = data['envelope']
         sub = data.get('subject',"*****")
-        string = " attachments: "+ str(att)+ " subject: "+sub
-        json_log(env, string)
+        string = " attachments: "+ " subject: "+sub
+        log(string)
+        json_log(env,"ENVELOPE")
         if att > 0:
             info = data.get('attachment-info')
             json_log(info)
@@ -189,10 +194,16 @@ def email(request):
 
         for event  in cal.walk():
             if event.name == "VEVENT":
+                uri = None
                 if "bluejeans" in env["from"]:
                     uri = getBlueJeansURI(event.get('DESCRIPTION'))
                 if "webex" in env["from"]:
                     uri = getWebexURI(event.get('DESCRIPTION'))
+                if uri == None:
+                    uri = getGenericURI(event.get('DESCRIPTION'))
+                if uri == None:
+                      return HttpResponse("Npo URI found")
+                
                 settings = {
                         'title':event.get('SUMMARY'),
                         'permanent': False,
@@ -212,8 +223,7 @@ def email(request):
             star.deleteGreenButton(uri)
 
     except Exception, e:
-        print "Exception"
-        print e.message
+        log ("EXCEPTION:  ", e.message)
         return  HttpResponse(e.message)
     return HttpResponse()
 
@@ -222,9 +232,13 @@ def email(request):
 def log(logdata,header=""):
     log = open(LOGFILE, 'a')
     log.write(str(datetime.datetime.now())+"--------------------\n")
+    log.write (header)
     if "static" in LOGFILE:
-        print logdata
-    log.write(logdata)
+        print logdata, header
+    if logdata:
+        log.write(logdata)
+    else:
+        log.write("None")
     log.write("\n")
     log.close()
     return 0
@@ -233,11 +247,17 @@ def log(logdata,header=""):
 
 def json_log(logdata,header=""):
     log = open(LOGFILE, 'a')
-    log.write(str(datetime.datetime.now())+"  "+header+" ---------------------\n")
-    log.write(json.dumps(logdata, sort_keys=True, indent=4, separators=(',', ': ')))
+    log.write(str(datetime.datetime.now())+"--------------------\n")
+    if len(header) > 0:
+        log.write(header+"\n")
+    try:
+        string = json.dumps(logdata, sort_keys=True, indent=4, separators=(',', ': '))
+    except:
+        string = "No JSON"
+    log.write(string)
     if "static" in LOGFILE:
-        print datetime.datetime.now(), "  ",header
-        print json.dumps(logdata, sort_keys=True, indent=4, separators=(',', ': '))
+        print header
+        print string
     log.write("\n")
     log.close()
     return 0
