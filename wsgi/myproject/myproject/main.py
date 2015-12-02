@@ -137,6 +137,11 @@ def getGenericURI(description):
         return match.group(1)
     return None
 
+Skype Meeting<https://meet.lync.com/starleaf1/william.macdonald/03ZIU1XF>
+
+def get_LyncURI(description)
+    match = re.search('Meeting<https://meet.lync.com/[a-zA-Z0-9-._]{0,62}/(
+
 
 
 def getTimezone(timezone):
@@ -162,6 +167,9 @@ def getTimezone(timezone):
 def email(request):
     
     log ("New email received")
+                      
+    log (request.body,"BODY")
+                      
     if request.method != 'POST':
         return HttpResponse('Invalid method')
             
@@ -194,7 +202,6 @@ def email(request):
 
 
         if not ics:
-            log (request.body,"BODY")
             return HttpResponse("no ICS")
 
         log ("found an ICS .... "+file['name']+" size "+str(len(ics)))
