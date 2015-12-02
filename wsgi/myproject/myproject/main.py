@@ -111,7 +111,7 @@ def serve_blank(request):
 
 ###############################################################################
 
-def getBluejeansURI(description):
+def getBlueJeansURI(description):
     match = re.search('Enter Meeting ID: ([0-9]{9,18})\s', description)
     if not match:
         return None
