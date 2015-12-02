@@ -175,6 +175,7 @@ def email(request):
         sub = data.get('subject',"*****")
         string = " attachments: "+att+ " subject: "+sub
         log(string)
+        ics = None
         att = int(att)
         json_log(env,"ENVELOPE")
         if att > 0:
@@ -186,12 +187,17 @@ def email(request):
                 log (name)
                 file = info[name]
                 json_log(file,"FILE")
-                if "ics" in file['type']:
+                if ".ics" in file['filename']:
                     ics_file = request.FILES.get(name)
                     ics = ics_file.read()
                     break;
 
-            log ("found an ICS .... "+file['name']+" size "+str(len(ics)))
+
+        if not ics:
+            log (request.body,"BODY")
+            return HttpResponse("no ICS")
+
+        log ("found an ICS .... "+file['name']+" size "+str(len(ics)))
 
 
         cal = Calendar.from_ical(ics)
