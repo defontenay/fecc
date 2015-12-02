@@ -187,7 +187,7 @@ def email(request):
                 file = info[name]
                 json_log(file,"FILE")
                 if "ics" in file['type']:
-                    ics_file = request.files.get(name)
+                    ics_file = request.FILES.get(name)
                     ics = ics_file.read()
                     break;
 
