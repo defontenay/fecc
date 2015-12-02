@@ -137,10 +137,11 @@ def getGenericURI(description):
         return match.group(1)
     return None
 
-Skype Meeting<https://meet.lync.com/starleaf1/william.macdonald/03ZIU1XF>
+#Skype Meeting<https://meet.lync.com/starleaf1/william.macdonald/03ZIU1XF>
 
-def get_LyncURI(description)
-    match = re.search('Meeting<https://meet.lync.com/[a-zA-Z0-9-._]{0,62}/(
+def getLyncURI(description):
+    return None
+#    match = re.search('Meeting<https://meet.lync.com/[a-zA-Z0-9-._]{0,62}/([a-zA-Z0-9-._]{0,62})/[a-zA-Z0-9-._]{0,16})>',description)
 
 
 
