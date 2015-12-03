@@ -12,21 +12,15 @@ email = \
     'permanent': False,
     'envelope': '{"to":["william.macdonald@starleaf.com"],"from":"messenger@webex.com"}',
     'attachment-info' : '{"attachment2":{"filename":"invite.ics","name":"invite.ics","type":"application/ics"},"attachment1":{"charset":"utf-8","type":"text/calendar"}}',
-    'attachment2' :'BEGIN:VCALENDAR',
 }
 
-headers = {'Content-type': 'application/json'}
+#headers = {'Content-type': 'multipart/form-data'}
 session = requests.Session()
 url='http://127.0.0.1:8000/email'
 #url='http://fecc.starleaf.com/email'
-
-j = json
-
-
-f = open("/users/will/now.ics",'r')
-email['attachment2'] = f.read()
-#print json.dumps(email, sort_keys=True, indent=4, separators=(',', ': '))
-r = session.post(url,data=json.dumps(email),headers=headers, verify=False)
+f = open("/users/will/now.ics",'rb')
+files = {'attachment2':f  }
+r = session.post(url,data=email,files=files, verify=False)
 c=r.status_code
 t=r.text
 

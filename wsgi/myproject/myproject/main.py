@@ -139,7 +139,11 @@ def getGenericURI(description):
 
 #Skype Meeting<https://meet.lync.com/starleaf1/william.macdonald/03ZIU1XF>
 
-def getLyncURI(description):
+def getLyncURI(description,email):
+    match = re.search('[a-zA-Z0-9-.+_]{4,64}@([a-zA-Z0-9-.]{0,62}?)',email)
+    if not match:
+        return None
+    dom = match.group(1)
     return None
 #    match = re.search('Meeting<https://meet.lync.com/[a-zA-Z0-9-._]{0,62}/([a-zA-Z0-9-._]{0,62})/[a-zA-Z0-9-._]{0,16})>',description)
 
@@ -175,17 +179,18 @@ def email(request):
         return HttpResponse('Invalid method')
             
     try:
-        if "static" in LOGFILE:
-            data = json.loads(request.body)
-        else:
-            data = request.POST.copy()
+        data = request.POST.copy()
         att = data.get('attachments',0)
         env  = json.loads(data['envelope'])
         sub = data.get('subject',"*****")
-        string = " attachments: "+att+ " subject: "+sub
-        log(string)
+        print "att ",att
+        print "env ", env
+        print "sub ",sub
         ics = None
         att = int(att)
+        if request.FILES:
+            for f in request.FILES:
+                json_log(f,"ALL FILES")
         json_log(env,"ENVELOPE")
         if att > 0:
             info = json.loads(data.get('attachment-info'))
@@ -196,13 +201,17 @@ def email(request):
                 log (name)
                 file = info[name]
                 json_log(file,"FILE")
-                if ".ics" in file['filename']:
+                if 'filename' in file and ".ics" in file['filename']:
                     ics_file = request.FILES.get(name)
+                    print name," ",ics_file
                     ics = ics_file.read()
                     break;
 
 
         if not ics:
+            if request.FILES:
+                for f in request.FILES:
+                    json_log(f,"ALL FILES")
             return HttpResponse("no ICS")
 
         log ("found an ICS .... "+file['name']+" size "+str(len(ics)))
@@ -243,7 +252,7 @@ def email(request):
 
     except Exception, e:
         log ("EXCEPTION:  ", e.message)
-        return  HttpResponse(e.message)
+        return  HttpResponse("EXECPTION is  "+e.message)
     return HttpResponse()
 
 ###############################################################################
@@ -253,7 +262,7 @@ def log(logdata,header=""):
     log.write(str(datetime.datetime.now())+"--------------------\n")
     log.write (header)
     if "static" in LOGFILE:
-        print logdata, header
+        print  header, logdata
     if logdata:
         log.write(logdata)
     else:
