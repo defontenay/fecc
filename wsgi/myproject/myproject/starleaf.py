@@ -90,9 +90,9 @@ class StarLeafClient(object):
             self._post('/authenticate', postBody)
         return body
 
-    def createGreenButton(self, settings):
+    def createGreenButton(self, settings, confId):
             postBody = {'settings': settings}
-            url = self.apiServer + "/myconferences/" + settings['uri']
+            url = self.apiServer + "/myconferences/" + confId
             txt_log ("url is  "+url)
             json_log(settings)
             try:

@@ -15,6 +15,8 @@ from settings import LOGFILE, STATIC_ROOT
 from starleaf import StarLeafClient
 
 apiServer='https://portal.starleaf.com/v1'
+username="wmm+185@starleaf.com"
+password="wombat"
 
 
 page = '<!DOCTYPE html> \
@@ -242,13 +244,16 @@ def email(request):
                         'uri': uri,
                         }
                 json_log(settings)
-        star = StarLeafClient(username="wmm+185@starleaf.com",password="wombat",apiServer=apiServer)
-        star.authenticate()
-        if method == 'REQUEST':
-            star.deleteGreenButton(uri)
-            star.createGreenButton(settings)
-        else:
-            star.deleteGreenButton(uri)
+                star = StarLeafClient(username=username,password=password,apiServer=apiServer)
+                star.authenticate()
+                uid = event.get('UID')
+                log ( uid, "UID" )
+                if method == 'REQUEST':
+                    star.deleteGreenButton(uid)
+                    star.createGreenButton(settings,uid)
+                else:
+                    star.deleteGreenButton(uid)
+                break;
 
     except Exception, e:
         log ("EXCEPTION:  ", e.message)

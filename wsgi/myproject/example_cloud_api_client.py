@@ -18,7 +18,7 @@ email = \
 session = requests.Session()
 url='http://127.0.0.1:8000/email'
 #url='http://fecc.starleaf.com/email'
-f = open("/users/will/now.ics",'rb')
+f = open("/users/will/new.ics",'rb')
 files = {'attachment2':f  }
 r = session.post(url,data=email,files=files, verify=False)
 c=r.status_code
