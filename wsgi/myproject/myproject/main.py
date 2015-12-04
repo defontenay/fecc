@@ -241,10 +241,19 @@ def email(request):
                     if uri == None:
                       return HttpResponse("No URI found")
                 
+                    target = env['to'][0]
+                    icsAttendees = event.get('ATTENDEE')
+                    icsAttendees = icsAttendees if type(icsAttendees) is list else [icsAttendees]
+                    participants = [{'email':target}]
+                    for participant in icsAttendees:
+                        mail = participant.decode()[7:]
+                        if mail != target:
+                            participants.append({'email': participant.decode()[7:]})
+
                     settings = {
                         'title':event.get('SUMMARY'),
                         'permanent': False,
-                        'participants': [{'email':env['to'][0]}],
+                        'participants': participants,
                         'timezone': getTimezone(event.decoded('DTSTART').tzinfo.zone),
                         'start': event.decoded('DTSTART').replace(tzinfo=None).isoformat(),
                         'end': event.decoded('DTEND').replace(tzinfo=None).isoformat(),
