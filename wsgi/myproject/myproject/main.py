@@ -224,17 +224,24 @@ def email(request):
 
         for event  in cal.walk():
             if event.name == "VEVENT":
+                uid = event.get('UID')
+                log ( uid, "UID" )
+                
+                star = StarLeafClient(username=username,password=password,apiServer=apiServer)
+                star.authenticate()
+
                 uri = None
-                if "bluejeans" in env["from"]:
-                    uri = getBlueJeansURI(event.get('DESCRIPTION'))
-                if "webex" in env["from"]:
-                    uri = getWebexURI(event.get('DESCRIPTION'))
-                if uri == None:
-                    uri = getGenericURI(event.get('DESCRIPTION'))
-                if uri == None:
+                if method == 'REQUEST':
+                    if "bluejeans" in env["from"]:
+                        uri = getBlueJeansURI(event.get('DESCRIPTION'))
+                    if "webex" in env["from"]:
+                        uri = getWebexURI(event.get('DESCRIPTION'))
+                    if uri == None:
+                            uri = getGenericURI(event.get('DESCRIPTION'))
+                    if uri == None:
                       return HttpResponse("No URI found")
                 
-                settings = {
+                    settings = {
                         'title':event.get('SUMMARY'),
                         'permanent': False,
                         'participants': [{'email':env['to'][0]}],
@@ -243,12 +250,8 @@ def email(request):
                         'end': event.decoded('DTEND').replace(tzinfo=None).isoformat(),
                         'uri': uri,
                         }
-                json_log(settings)
-                star = StarLeafClient(username=username,password=password,apiServer=apiServer)
-                star.authenticate()
-                uid = event.get('UID')
-                log ( uid, "UID" )
-                if method == 'REQUEST':
+                    json_log(settings,"SL-SETTINGS")
+
                     star.deleteGreenButton(uid)
                     star.createGreenButton(settings,uid)
                 else:
