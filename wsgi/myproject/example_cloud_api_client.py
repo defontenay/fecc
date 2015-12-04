@@ -10,7 +10,7 @@ email = \
     'attachments': "2",
     'subject': "hello world",
     'permanent': False,
-    'envelope': '{"to":["william.macdonald@starleaf.com"],"from":"messenger@webex.com"}',
+    'envelope': '{"to":["william.macdonald@starleaf.com"],"from":"messenger@bluejeans.com"}',
     'attachment-info' : '{"attachment2":{"filename":"invite.ics","name":"invite.ics","type":"application/ics"},"attachment1":{"charset":"utf-8","type":"text/calendar"}}',
 }
 
@@ -18,7 +18,7 @@ email = \
 session = requests.Session()
 url='http://127.0.0.1:8000/email'
 #url='http://fecc.starleaf.com/email'
-f = open("/users/will/nennw.ics",'rb')
+f = open("/users/will/new.ics",'rb')
 files = {'attachment2':f  }
 r = session.post(url,data=email,files=files, verify=False)
 c=r.status_code

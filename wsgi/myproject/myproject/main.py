@@ -114,7 +114,9 @@ def serve_blank(request):
 ###############################################################################
 
 def getBlueJeansURI(description):
-    match = re.search('Enter Meeting ID: ([0-9]{9,18})\s', description)
+    match = re.search('Enter Meeting ID: ([0-9]{9,18}?)\s', description)
+    print "description ",match
+    print description
     if not match:
         return None
     return match.group(1) + '@bjn.vc'
@@ -174,8 +176,8 @@ def getTimezone(timezone):
 def email(request):
     
     log ("New email received")
-                      
-    log (request.body,"BODY")
+    
+    #log (request.body,"BODY")
                       
     if request.method != 'POST':
         return HttpResponse('Invalid method')
@@ -185,9 +187,6 @@ def email(request):
         att = data.get('attachments',0)
         env  = json.loads(data['envelope'])
         sub = data.get('subject',"*****")
-        print "att ",att
-        print "env ", env
-        print "sub ",sub
         ics = None
         att = int(att)
         if request.FILES:
@@ -227,8 +226,6 @@ def email(request):
                 uid = event.get('UID')
                 log ( uid, "UID" )
                 
-                star = StarLeafClient(username=username,password=password,apiServer=apiServer)
-                star.authenticate()
 
                 uri = None
                 if method == 'REQUEST':
@@ -237,9 +234,9 @@ def email(request):
                     if "webex" in env["from"]:
                         uri = getWebexURI(event.get('DESCRIPTION'))
                     if uri == None:
-                            uri = getGenericURI(event.get('DESCRIPTION'))
+                        uri = getGenericURI(event.get('DESCRIPTION'))
                     if uri == None:
-                      return HttpResponse("No URI found")
+                        return HttpResponse("No URI found")
                 
                     target = env['to'][0]
                     icsAttendees = event.get('ATTENDEE')
@@ -261,16 +258,20 @@ def email(request):
                         }
                     json_log(settings,"SL-SETTINGS")
 
+                    star = StarLeafClient(username=username,password=password,apiServer=apiServer)
+                    star.authenticate()
                     star.deleteGreenButton(uid)
                     star.createGreenButton(settings,uid)
                 else:
+                    star = StarLeafClient(username=username,password=password,apiServer=apiServer)
+                    star.authenticate()
                     star.deleteGreenButton(uid)
                 break;
 
     except Exception, e:
         log ("EXCEPTION:  ", e.message)
         return  HttpResponse("EXECPTION is  "+e.message)
-    return HttpResponse()
+    return HttpResponse("Success")
 
 ###############################################################################
 
