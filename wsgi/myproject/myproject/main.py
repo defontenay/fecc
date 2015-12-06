@@ -284,7 +284,7 @@ def slack(request):
     else:
         HttpResponse("Failure")
 
-    log(data,"FULL BODY")
+
 
     token=data.get("token")
     team_id=data.get('team_id')
@@ -296,6 +296,8 @@ def slack(request):
     command=data.get("command")
     text=data.get("text")
     response_url=data.get("response_url")
+
+
     return HttpResponse("Success")
 
 
