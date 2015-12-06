@@ -276,7 +276,13 @@ def email(request):
 ###############################################################################
 
 def slack(request):
-    data = request.POST.copy()
+    
+    if request.method == 'POST':
+        data = request.POST.copy()
+    elif request.method == 'GET':
+        data = request.GET.copy()
+    else:
+        HttpResponse("Failure")
 
     log(data,"FULL BODY")
 
@@ -286,7 +292,7 @@ def slack(request):
     channel_id=data.get("channel_id")
     channel_name=data.get('channel_name')
     user_id=data.get('user_id')
-    user_name=data.get('user_name')'
+    user_name=data.get('user_name')
     command=data.get("command")
     text=data.get("text")
     response_url=data.get("response_url")
