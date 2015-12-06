@@ -275,6 +275,26 @@ def email(request):
 
 ###############################################################################
 
+def slack(request):
+    data = request.POST.copy()
+
+    log(data,"FULL BODY")
+
+    token=data.get("token")
+    team_id=data.get('team_id')
+    team_domain=data.get("team_domain")
+    channel_id=data.get("channel_id")
+    channel_name=data.get('channel_name')
+    user_id=data.get('user_id')
+    user_name=data.get('user_name')'
+    command=data.get("command")
+    text=data.get("text")
+    response_url=data.get("response_url")
+    return HttpResponse("Success")
+
+
+###############################################################################
+
 def log(logdata,header=""):
     log = open(LOGFILE, 'a')
     log.write(str(datetime.datetime.now())+"--------------------\n")

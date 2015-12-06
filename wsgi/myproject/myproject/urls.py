@@ -28,5 +28,6 @@ urlpatterns = [
                url(r'^down', main.down),
                url(r'^pc', main.pc),
                url(r'^email', main.email),
+               url(r'^slack', main.slack),
                url(r'^', main.serve_blank)
 ]
