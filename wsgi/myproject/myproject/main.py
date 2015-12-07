@@ -177,8 +177,6 @@ def getTimezone(timezone):
 def email(request):
     
     log ("New email received")
-    
-    #log (request.body,"BODY")
                       
     if request.method != 'POST':
         return HttpResponse('Invalid method')
@@ -194,7 +192,9 @@ def email(request):
             for f in request.FILES:
                 json_log(f,"ALL FILES")
         json_log(env,"ENVELOPE")
-        if att > 0:
+        if att == 0:
+            log (request.body,"BODY")
+        else:
             info = json.loads(data.get('attachment-info'))
             json_log(info,"ATTCHMENTS")
             for x in range(1,att+1):
@@ -239,10 +239,13 @@ def email(request):
                     if uri == None:
                         return HttpResponse("No URI found")
                 
-                    target = env['to'][0]
+                    participants = []
+                    for target in env['to']:
+                            participants.append( {'email':target} )
+                    
                     icsAttendees = event.get('ATTENDEE')
                     icsAttendees = icsAttendees if type(icsAttendees) is list else [icsAttendees]
-                    participants = [{'email':target}]
+
                     for participant in icsAttendees:
                         mail = participant.decode()[7:]
                         if mail != target:
@@ -284,7 +287,7 @@ def slack(request):
         data = request.GET.copy()
     else:
         HttpResponse("Failure")
-
+    
     return HttpResponse(StarLeafSlack(data))
 
 
