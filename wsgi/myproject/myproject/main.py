@@ -13,6 +13,7 @@ from django.http import HttpResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
 from settings import LOGFILE, STATIC_ROOT
 from starleaf import StarLeafClient
+from slack import StarLeafSlack
 
 apiServer='https://portal.starleaf.com/v1'
 username="wmm+185@starleaf.com"
@@ -284,21 +285,7 @@ def slack(request):
     else:
         HttpResponse("Failure")
 
-
-
-    token=data.get("token")
-    team_id=data.get('team_id')
-    team_domain=data.get("team_domain")
-    channel_id=data.get("channel_id")
-    channel_name=data.get('channel_name')
-    user_id=data.get('user_id')
-    user_name=data.get('user_name')
-    command=data.get("command")
-    text=data.get("text")
-    response_url=data.get("response_url")
-
-
-    return HttpResponse("Success")
+    return HttpResponse(StarLeafSlack(data))
 
 
 ###############################################################################

@@ -112,6 +112,28 @@ class StarLeafClient(object):
                 txt_log ("Cloud API error"+e.message)
 
 
+    def createConf(self, settings):
+        print('Creating conference.')
+        postBody = {'settings': settings}
+        respBody = self._post('/myconferences', postBody)
+        if respBody is not None and respBody.get('conf_id') is not None:
+            print('New conference created with id: %s' % respBody['conf_id'])
+        return respBody
+
+    def updateConf(self, confId, settings):
+        print('Changing conference with id: %s' % confId)
+        postBody = {'settings': settings}
+        self._put('/myconferences/%s' % confId, postBody)
+
+    def deleteConf(self, confId):
+        print('Deleting conference with id: %s' % confId)
+        self._delete('/myconferences/%s' % confId)
+
+    def getConf(self, confId):
+        print('Getting conference info with id: %s' % confId)
+        return self._get('/myconferences/%s' % confId)
+
+
 
 
 ###############################################################################
