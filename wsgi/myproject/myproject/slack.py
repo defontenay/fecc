@@ -32,6 +32,7 @@ class User(object):
 
     def get(self, id):
         r = None
+        print "list len is ",str(len(list))
         for u in list:
             print u.slack, "  ", u.email, "   ",u.password
             if u.slack == id:
@@ -180,6 +181,8 @@ def StarLeafSlack(data):
             if m2:
                 print "found an email"
                 email = m2.group(1)
+                user = make_user(user_id,email,password)
+                result += "Your pasword has been saved\n"
             if password:
                 user = make_user(user_id,email,password)
                 result += "Your pasword has been saved\n"
