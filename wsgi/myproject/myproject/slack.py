@@ -20,7 +20,7 @@ class User(object):
 
     def __init__(self):
         self.slack = ""
-        self.email = ""
+        self.email = "                "
         self.password = ""
         self.error = ""
     
@@ -31,9 +31,12 @@ class User(object):
         list.append(self)
 
     def get(self, id):
+        r = None
         for u in list:
+            print u.slack, "  ", u.email, "   ",e.password
             if u.slack == id:
-                return(u)
+                r = u
+        return(r)
 
 
 
@@ -162,6 +165,7 @@ def StarLeafSlack(data):
     user_id=data.get('user_id')
     text=data.get('text')
     body = slack.getUser(user_id)
+    result = ""
     if body:
         user = look_up_user(user_id)
         if not user:
@@ -178,7 +182,7 @@ def StarLeafSlack(data):
                 email = m2.group(1)
             if password:
                 user = make_user(user_id,email,password)
-                result = "Your pasword has been saved\nscheduling your conference now"
+                result += "Your pasword has been saved\n"
         if not user:
             string =    "First time using StarLeaf?\n"
             string +=   "Use */starleaf pw=password* where password is your StarLeaf Breeze password\n"
@@ -192,12 +196,11 @@ def StarLeafSlack(data):
             user.save()
             return string
     
-        result = "scheduling your conference now"
+        result += "scheduling your conference now"
+        thread1 = threading.Thread(target=makeConference, args = (slack,user,data))
+            thread1.start()
     else:
-        result = "Weird error"
-
-    thread1 = threading.Thread(target=makeConference, args = (slack,user,data))
-    thread1.start()
+        result += "Weird error"
 
     return result
 
