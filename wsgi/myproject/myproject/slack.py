@@ -168,7 +168,7 @@ def StarLeafSlack(data):
     result = ""
     if body:
         user = look_up_user(user_id)
-        if not user:
+        if not user or len(user.password) is 0:
             email = body['user']['profile']['email']
             print text, " no previous user ", email
             m1 = re.search('pw=(\S+)\s*', text)
@@ -198,7 +198,7 @@ def StarLeafSlack(data):
     
         result += "scheduling your conference now"
         thread1 = threading.Thread(target=makeConference, args = (slack,user,data))
-            thread1.start()
+        thread1.start()
     else:
         result += "Weird error"
 
