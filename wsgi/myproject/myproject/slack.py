@@ -22,7 +22,7 @@ headers = {'Content-type': 'application/json'}
 LOGFILE = "./satic.log"
 warnings.filterwarnings("ignore")
 apiServer='https://portal.starleaf.com/v1'
-
+token = "xoxp-4281906585-4695033383-16028628019-ca364cc223"
 
 join =      "<@<uid>> has invited you to a StaLeaf video call\n"
 join +=     "From Breeze click  <https://portal.starleaf.com/breezelinks/redirect?dial=<uri>|here\n"
@@ -127,7 +127,7 @@ def make_user(id):
     return user
 
 def StarLeafSlack(data):
-    slack = SlackClient("xoxp-4281906585-4695033383-16028628019-ca364cc223", "https://slack.com/api/")
+    slack = SlackClient(token, "https://slack.com/api/")
     if not slack.authenticate():
         return "Cloud error"
     user_id=data.get('user_id')
@@ -168,8 +168,8 @@ def StarLeafSlack(data):
                                  
         if user.password == "":
             string =   "Use */starleaf pw=pass* where pass is your Breeze password\n"
-            string +=   "If "+email+" is not your StarLeaf email then...\n"
-            string +=   "Use */starleaf pw=password em=me@dom.com* where me@dom.com is your StarLeaf email"
+            #  string +=   "If "+email+" is not your StarLeaf email then...\n"
+            #  string +=   "Use */starleaf pw=password em=me@dom.com* where me@dom.com is your StarLeaf email"
             return string
                                  
         if user.error != "":
@@ -245,9 +245,12 @@ def makeConference(slack,user,data):
     print json_log(parms)
     print "URL is ", url
     r = session.post(url,headers=headers,data=parms)
+    print "RETURN ",r.status_code
+    print "TEXT : ",r.text
+    print json.dumps(r.body, sort_keys=True, indent=4, separators=(',', ': '))
     if r.status_code != 200:
         user.error = "POST error "+str(r.status_code)
-        usr.save()
+        user.save()
     print r.body
     print "KILL normal"
     return
