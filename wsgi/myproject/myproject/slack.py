@@ -33,7 +33,7 @@ class User(object):
     def get(self, id):
         r = None
         for u in list:
-            print u.slack, "  ", u.email, "   ",e.password
+            print u.slack, "  ", u.email, "   ",u.password
             if u.slack == id:
                 r = u
         return(r)
