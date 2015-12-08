@@ -151,8 +151,8 @@ def StarLeafSlack(data):
             if user:
                 print "user ",email," did not set PW "
             print text, " no previous pw set for ", email
-            m1 = re.search('pw=(\S+)\s', text)
-            m2 = re.search('em=([a-zA-Z0-9-.+_]{4,64}@[a-zA-Z0-9-.]{0,62}?)\s', text)
+            m1 = re.search('pw=(\S+)', text)
+            m2 = re.search('em=([a-zA-Z0-9-.+_]{1,64}@[a-zA-Z0-9-.]{3,62})', text)
             if not user:
                 user = make_user(user_id)
                 user.email = email
@@ -222,7 +222,7 @@ def makeConference(slack,user,data):
     for uid in members:
         guest = look_up_user(uid)
         if guest:
-            guest = {"email": guest.email}    # if they have a different SL address then add that too
+            dest = {"email": guest.email}    # if they have a different SL address then add that too
         else:
             gst_body = slack.getUser(uid)                                # get the users details
             dest = {"email":gst_body['user']['profile']['email']}       #mainly emai address
