@@ -241,17 +241,14 @@ def makeConference(slack,user,data):
     post = conf.replace("<uid>",uid)
                                
     session = requests.Session()
-    parms = {"text":post}
-    print json_log(parms)
+    parms = json.dumps( {"text":post} )
     print "URL is ", url
     r = session.post(url,headers=headers,data=parms)
     print "RETURN ",r.status_code
     print "TEXT : ",r.text
-    print json.dumps(r.body, sort_keys=True, indent=4, separators=(',', ': '))
     if r.status_code != 200:
         user.error = "POST error "+str(r.status_code)
         user.save()
-    print r.body
     print "KILL normal"
     return
 
