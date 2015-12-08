@@ -24,10 +24,26 @@ warnings.filterwarnings("ignore")
 apiServer='https://portal.starleaf.com/v1'
 token = "xoxp-4281906585-4695033383-16028628019-ca364cc223"
 
+help_text =  "This creates a new StarLeaf conference, with you as moderator\n"
+help_text+=  "Users will get a Breeze link to click and the dial-in number\n"
+help_text+=  "for PSTN. All members of this channel will get a Green Button\n"
+help_text+=  "if they are a StarLeaf user. Its named after the Channel"
+help_text+=  "You need to tell me your StarLeaf password by typing/n"
+help_text+=  "     */starleaf pw=password*   \n"
+help_text+=  "and if you use a different email on StaLeaf tell me that too\n"
+help_text+=  "     */starleaf em=my@email.ad pw=password*   \n"
+help_text+=  "If you set the wrog email or password you can reset it with.. \n"
+help_text+=  "     */starleaf delete*   \n"
+
+
+
 join =      "<@<uid>> has invited you to a StaLeaf video call\n"
-join +=     "From Breeze click  <https://portal.starleaf.com/breezelinks/redirect?dial=<uri>|here>\n"
-join +=     "or press the green button, or dial <conf-id> on StarLeaf\n"
-join +=     "from your telephone, dial USA:+1 888 998 5260 or UK:+44 330 828 0796 and enter access code *<conf-id>*"
+join +=     "- Breeze users can click  <https://portal.starleaf.com/breezelinks/redirect?dial=<uri>|here>\n"
+join +=     "- Or press the green button, or dial <conf-id> on StarLeaf\n"
+join +=     "- from a phone, dial the local number and use the code *<conf-id>*\n"
+join +=     "- Local numbers are.. USA:+1 888 998 5260 or UK:+44 330 828 0796\n"
+join +=     " -With Lync, H.323 or SIP dial <uri>\n"
+
 
 def log(logdata,header=""):
     print  header, logdata
@@ -139,6 +155,9 @@ def StarLeafSlack(data):
             u.delete()
         return "Deleted ALL records"
 
+    if "help" in text:
+        return help_text
+
     body = slack.getUser(user_id)
     result = ""
     if body:
@@ -167,14 +186,14 @@ def StarLeafSlack(data):
             user.save()
                                  
         if user.password == "":
-            string =   "Use */starleaf pw=pass* where pass is your Breeze password\n"
+            string =   "Use */starleaf pw=pass* where pass is your Breeze password"
             #  string +=   "If "+email+" is not your StarLeaf email then...\n"
             #  string +=   "Use */starleaf pw=password em=me@dom.com* where me@dom.com is your StarLeaf email"
             return string
                                  
         if user.error != "":
             result += "Your previous error was\n"
-            result += user.error +" \n"
+            result += user.error
             user.error = ""
             user.save()
 
