@@ -166,9 +166,8 @@ def StarLeafSlack(data):
                 result += "Your pasword has been saved\n"
             user.save()
                                  
-        if not user:
-            string =    "First time using StarLeaf?\n"
-            string +=   "Use */starleaf pw=password* where password is your StarLeaf Breeze password\n"
+        if user.password = "":
+            string =   "Use */starleaf pw=pass* where pass is your Breeze password\n"
             string +=   "If "+email+" is not your StarLeaf email then...\n"
             string +=   "Use */starleaf pw=password em=me@dom.com* where me@dom.com is your StarLeaf email"
             return string
@@ -178,7 +177,7 @@ def StarLeafSlack(data):
             result += user.error +" \n"
             user.error = ""
             user.save()
-    
+
         result += "scheduling your conference now"
         thread1 = threading.Thread(target=makeConference, args = (slack,user,data))
         thread1.start()
