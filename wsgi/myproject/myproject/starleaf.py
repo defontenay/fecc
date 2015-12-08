@@ -87,8 +87,8 @@ class StarLeafClient(object):
             postBody = { 'username': self.username,
                         'response': authResponse}
             txt_log ('SL Sending challenge response to API server.')
-            body = self._post('/authenticate', postBody)
-            if body and "error" in body:
+            b = self._post('/authenticate', postBody)
+            if b and "error" in b:
                 return None
         return body
 

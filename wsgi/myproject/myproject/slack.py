@@ -183,7 +183,7 @@ def StarLeafSlack(data):
             string =    "First time using StarLeaf?\n"
             string +=   "Use */starleaf pw=password* where password is your StarLeaf Breeze password\n"
             string +=   "If "+email+" is not your StarLeaf email then...\n"
-            string +=   "Use */starleaf pw=<password em=me@dom.com* where me@dom.com is your StarLeaf email"
+            string +=   "Use */starleaf pw=password em=me@dom.com* where me@dom.com is your StarLeaf email"
             return string
         if user.error != "":
             string = "Your previous error was\n"
