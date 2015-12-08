@@ -110,6 +110,7 @@ def pc(request):
     return HttpResponse(page)
 
 def serve_blank(request):
+    print "Got Request"
     return  HttpResponse(page)
 
 ###############################################################################

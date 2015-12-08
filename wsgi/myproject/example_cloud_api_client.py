@@ -5,31 +5,81 @@ import json
 
 
 
-email = \
-    {'text': "body of email",
-    'attachments': "2",
-    'subject': "hello world",
-    'permanent': False,
-    'envelope': '{"to":["william.macdonald@starleaf.com"],"from":"messenger@bluejeans.com"}',
-    'attachment-info' : '{"attachment2":{"filename":"invite.ics","name":"invite.ics","type":"application/ics"},"attachment1":{"charset":"utf-8","type":"text/calendar"}}',
+
+
+web1 = \
+{   "channel_id":"C0489SNJ9",
+    "team_domain":"mycomp",
+    "channel_name":"thischannel",
+    "user_name":"Fred",
+    "user_id" :"U0G0Y8D7A",
+    "command":"/starleaf",
+        "response_url":"http://127.0.0.0:8000/",
+    "text":""
 }
 
-#headers = {'Content-type': 'multipart/form-data'}
+
+
+web2 = \
+{   "channel_id":"C0489SNJ9",
+    "team_domain":"mycomp",
+    "channel_name":"thischannel",
+    "user_name":"Fred",
+    "user_id" :"U0G0Y8D7A",
+    "command":"/starleaf",
+     "response_url":"http://127.0.0.0:8000/",
+    "text":"pw=wombat em=william.macdonald@starleaf.com"
+}
+
+web0 = \
+{   "channel_id":"C0489SNJ9",
+    "team_domain":"mycomp",
+    "channel_name":"thischannel",
+    "user_name":"Fred",
+    "user_id" :"U0G0Y8D7A",
+    "command":"/starleaf",
+        "response_url":"http://127.0.0.0:8000/",
+    "text":"delete-all"
+}
+
+
+headers = {'Content-type': 'application/json'}
 session = requests.Session()
-url='http://127.0.0.1:8000/email'
-#url='http://fecc.starleaf.com/email'
-f = open("/users/will/new.ics",'rb')
-files = {'attachment2':f  }
-r = session.post(url,data=email,files=files, verify=False)
+url='http://127.0.0.1:8000/slack/'
+#
+#f = open("/users/will/new.ics",'rb')
+#files = {'attachment2':f  }
+#r = session.post(url,data=email,files=files, verify=False)
+r = session.get(url,params=web0, headers=headers)
 c=r.status_code
 t=r.text
-
-
-
 print 'Response code is:', c
 if c == 500:
     i = t.find('<div id="summary">')
     print t[i:i+300]
+    exit()
 else:
-    print 'Body text is:', t
+    print 'Body text is:\n', t
+raw_input()
+r = session.get(url,params=web1, headers=headers)
+c=r.status_code
+t=r.text
+print 'Response code is:', c
+if c == 500:
+    i = t.find('<div id="summary">')
+    print t[i:i+300]
+    exit()
+else:
+    print 'Body text is: \n', t
+raw_input()
+r = session.get(url,params=web2, headers=headers)
+c=r.status_code
+t=r.text
+print 'Response code is:', c
+if c == 500:
+    i = t.find('<div id="summary">')
+    print t[i:i+300]
+    exit()
+else:
+    print 'Body text is: \n', t
 

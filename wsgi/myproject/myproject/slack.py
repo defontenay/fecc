@@ -14,34 +14,7 @@ import warnings
 import threading
 from starleaf import StarLeafClient
 from datetime import datetime, timedelta
-
-list = []
-class User(object):
-
-    def __init__(self):
-        self.slack = ""
-        self.email = "                "
-        self.password = ""
-        self.error = ""
-    
-    def __str__(self):
-        return self.slack+"  "+self.email+"   "+self.password
-
-    def save(self):
-        list.append(self)
-
-    def get(self, id):
-        r = None
-        print "list len is ",str(len(list))
-        for u in list:
-            print u.slack, "  ", u.email, "   ",u.password
-            if u.slack == id:
-                r = u
-        return(r)
-
-
-
-#    from users.models import User
+from users.models import User
 
 
 
@@ -142,20 +115,14 @@ class SlackClient(object):
 
 
 def look_up_user(id):
-    u = User()
-    return u.get(id)
     try:
         user = User.objects.get(slack = id)
     except:
         return None
     return user
 
-def make_user(id, email, password):
-    user = User()
-    user.slack = id
-    user.email = email
-    user.password = password
-    user.error = ""
+def make_user(id):
+    user = User(slack = id, email = "", password = "",error = "")
     user.save()
     return user
 
@@ -165,39 +132,52 @@ def StarLeafSlack(data):
         return "Cloud error"
     user_id=data.get('user_id')
     text=data.get('text')
+
+    if "delete-all" in text:
+        l  = User.objects.all()
+        for u in l:
+            u.delete()
+        return "Deleted ALL records"
+
     body = slack.getUser(user_id)
     result = ""
     if body:
         user = look_up_user(user_id)
+        if user and "delete" in text:
+            user.delete()
+            return "Deleted"
         if not user or len(user.password) is 0:
             email = body['user']['profile']['email']
-            print text, " no previous user ", email
-            m1 = re.search('pw=(\S+)\s*', text)
+            if user:
+                print "user ",email," did not set PW "
+            print text, " no previous pw set for ", email
+            m1 = re.search('pw=(\S+)\s', text)
             m2 = re.search('em=([a-zA-Z0-9-.+_]{4,64}@[a-zA-Z0-9-.]{0,62}?)\s', text)
-            password = None
+            if not user:
+                user = make_user(user_id)
+                user.email = email
             if m1:
-                print "found a password"
-                password = m1.group(1)
+                user.password = m1.group(1)
+                print "found a password ",user.password
+                result += "Your pasword has been saved\n"
             if m2:
-                print "found an email"
-                email = m2.group(1)
-                user = make_user(user_id,email,password)
+                user.email= m2.group(1)
+                print "found an email ",user.email
                 result += "Your pasword has been saved\n"
-            if password:
-                user = make_user(user_id,email,password)
-                result += "Your pasword has been saved\n"
+            user.save()
+                                 
         if not user:
             string =    "First time using StarLeaf?\n"
             string +=   "Use */starleaf pw=password* where password is your StarLeaf Breeze password\n"
             string +=   "If "+email+" is not your StarLeaf email then...\n"
             string +=   "Use */starleaf pw=password em=me@dom.com* where me@dom.com is your StarLeaf email"
             return string
+                                 
         if user.error != "":
-            string = "Your previous error was\n"
-            string += user.error
+            result += "Your previous error was\n"
+            result += user.error +" \n"
             user.error = ""
             user.save()
-            return string
     
         result += "scheduling your conference now"
         thread1 = threading.Thread(target=makeConference, args = (slack,user,data))
@@ -218,7 +198,7 @@ def makeConference(slack,user,data):
     'end': " ",
     'participants': [ ],   }
     
-    print "NEW Spawned Process:"
+    print "NEW Spawned Process: ", user.slack, " em  ",user.email,"  pw  ",user.password
 
     channel_id=data.get("channel_id")
     name = data.get("user_name")
@@ -265,7 +245,7 @@ def makeConference(slack,user,data):
     parms = {"text":post}
     print json_log(parms)
     print "URL is ", url
-    r = session.post(url,headers=deaders,data=parms)
+    r = session.post(url,headers=headers,data=parms)
     if r.status_code != 200:
         user.error = "POST error "+str(r.status_code)
         usr.save()
@@ -275,47 +255,6 @@ def makeConference(slack,user,data):
 
 
 
-
-
-web0 = \
-{   "channel_id":"C0489SNJ9",
-    "team_domain":"mycomp",
-    "channel_name":"thischannel",
-    "user_name":"Fred",
-    "user_id" :"U0G0Y8D7A",
-    "command":"/starleaf",
-    "text":""
-}
-
-
-web1 = \
-{   "channel_id":"C0489SNJ9",
-    "team_domain":"mycomp",
-    "channel_name":"thischannel",
-    "user_name":"Fred",
-    "user_id" :"U0G0Y8D7A",
-    "command":"/starleaf",
-    "text":"pw=fred"
-}
-
-
-web2 = \
-{   "channel_id":"C0489SNJ9",
-    "team_domain":"mycomp",
-    "channel_name":"thischannel",
-    "user_name":"Fred",
-    "user_id" :"U0G0Y8D7A",
-    "command":"/starleaf",
-    "text":""
-}
-
-
-
-
-#print StarLeafSlack(web0)
-
-
-                         
                          
 
 
