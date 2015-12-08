@@ -166,7 +166,7 @@ def StarLeafSlack(data):
                 result += "Your pasword has been saved\n"
             user.save()
                                  
-        if user.password = "":
+        if user.password == "":
             string =   "Use */starleaf pw=pass* where pass is your Breeze password\n"
             string +=   "If "+email+" is not your StarLeaf email then...\n"
             string +=   "Use */starleaf pw=password em=me@dom.com* where me@dom.com is your StarLeaf email"
