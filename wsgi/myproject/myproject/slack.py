@@ -11,8 +11,33 @@ import binascii
 import pytz
 import time
 import warnings
+import threading
 from starleaf import StarLeafClient
 from datetime import datetime, timedelta
+
+list = []
+class User(object):
+
+    def __init__(self):
+        self.slack = ""
+        self.email = ""
+        self.password = ""
+        self.error = ""
+    
+    def __str__(self):
+        return self.slack+"  "+self.email+"   "+self.password
+
+    def save(self):
+        list.append(self)
+
+    def get(self, id):
+        for u in list:
+            if u.slack == id:
+                return(u)
+
+
+
+#    from users.models import User
 
 
 
@@ -21,19 +46,11 @@ LOGFILE = "./satic.log"
 warnings.filterwarnings("ignore")
 apiServer='https://portal.starleaf.com/v1'
 
-starleafConference = {'title': 'conf',
-    'description': 'This conference was created from Slack.',
-    'timezone': 'UTC',
-    'permanent': False,
-    'start': " ",
-    'end': " ",
-    'participants': [ ],
-}
 
-join =      "You have been invited to jump on a StaLeaf video call\n"
-join +=     "From Breeze click https://portal.starleaf.com/breezelinks/redirect?dial=<uri>\n"
+join =      "<@<uid>> has invited you to a StaLeaf video call\n"
+join +=     "From Breeze click  <https://portal.starleaf.com/breezelinks/redirect?dial=<uri>|here\n"
 join +=     "or press the green button, or dial <conf-id>\n"
-join +=     "from your telephone, dial USA:+1 888 998 5260 or UK:+44 330 828 0796 and enter access code <conf-id>"
+join +=     "from your telephone, dial USA:+1 888 998 5260 or UK:+44 330 828 0796 and enter access code *<conf-id>*"
 
 def log(logdata,header=""):
     print  header, logdata
@@ -88,13 +105,13 @@ class SlackClient(object):
     
     @staticmethod
     def _getBody(response):
-        log ( str(response.status_code),'Response code is:' )
+        #   log ( str(response.status_code),'Response code is:' )
         try:
             body = response.json()
         except ValueError:
             return None
         else:
-            json_log (body,"RESPONSE")
+            #            json_log (body,"RESPONSE")
             if not body['ok']:
                 return None
             return body
@@ -120,106 +137,177 @@ class SlackClient(object):
         return body
 
 
-def look_up_user(slack_id):
-    return ("wmm+185@starleaf.com","wombat")
+def look_up_user(id):
+    u = User()
+    return u.get(id)
+    try:
+        user = User.objects.get(slack = id)
+    except:
+        return None
+    return user
 
+def make_user(id, email, password):
+    user = User()
+    user.slack = id
+    user.email = email
+    user.password = password
+    user.error = ""
+    user.save()
+    return user
 
 def StarLeafSlack(data):
     slack = SlackClient("xoxp-4281906585-4695033383-16028628019-ca364cc223", "https://slack.com/api/")
     if not slack.authenticate():
         return "Cloud error"
-    channel_id=data.get("channel_id")
     user_id=data.get('user_id')
-    command=data.get("command")
-    text=data.get("text")
-    name = data.get("user_name")
-    dom=data.get("team_domain")
-    chan=data.get("channel_name")
+    text=data.get('text')
     body = slack.getUser(user_id)
-    result = "Did not work"
     if body:
-        # email, password = look_up_user(user_id)
-        email = None                        # this will force it to use the slack email
-        password = "wombat"
-        if not email:
+        user = look_up_user(user_id)
+        if not user:
             email = body['user']['profile']['email']
-            m1 = re.search('pw=(\S+)\s', text)
+            print text, " no previous user ", email
+            m1 = re.search('pw=(\S+)\s*', text)
             m2 = re.search('em=([a-zA-Z0-9-.+_]{4,64}@[a-zA-Z0-9-.]{0,62}?)\s', text)
+            password = None
             if m1:
+                print "found a password"
                 password = m1.group(1)
             if m2:
+                print "found an email"
                 email = m2.group(1)
-        if not password:
-            string =    "First time using StarLeaf ?\n"
-            string +=   "Use /starleaf pw=<pass> where <pass> is your StarLeaf Breeze password\n"
-            string +=   "If "+email+" is not your StarLeaf email then do\n"
-            string +=   "/starleaf pw=<pass> em=<email> where <email> is your StarLeaf email"
+            if password:
+                user = make_user(user_id,email,password)
+                result = "Your pasword has been saved\nscheduling your conference now"
+        if not user:
+            string =    "First time using StarLeaf?\n"
+            string +=   "Use */starleaf pw=password* where password is your StarLeaf Breeze password\n"
+            string +=   "If "+email+" is not your StarLeaf email then...\n"
+            string +=   "Use */starleaf pw=<password em=me@dom.com* where me@dom.com is your StarLeaf email"
             return string
+        if user.error != "":
+            string = "Your previous error was\n"
+            string += user.error
+            user.error = ""
+            user.save()
+            return string
+    
+        result = "scheduling your conference now"
+    else:
+        result = "Weird error"
 
-        star = StarLeafClient(username=email,password=password,apiServer=apiServer)
-        if not star.authenticate():
-            return("we failed to log you onto the StarLeaf cloud, please check your settings")
+    thread1 = threading.Thread(target=makeConference, args = (slack,user,data))
+    thread1.start()
 
-        starleafConference['title'] = name+" "+chan+" "+dom                  # start building the conference
-        starleafConference['start'] = datetime.utcnow().isoformat()
-        starleafConference['end'] =  (datetime.utcnow() + timedelta(minutes=5)).isoformat()
-
-        ch_body = slack.getChannel(channel_id)          # grabe the channel details
-        members = ch_body['channel']['members']     #then go through the memenbers
-        for uid in members:
-            em2, pw2 = look_up_user(uid)
-            if em2:
-                dest = {"email": em2}    # if they have a different SL address then add that too
-            else:
-                usr_body = slack.getUser(uid)                                # get the users details
-                dest = {"email":usr_body['user']['profile']['email']}       #mainly emai address
-            starleafConference['participants'].append(dest)                # add to list odf invitees
-        conf = star.createConf(starleafConference)
-        try:
-            dial = conf['dial_info']
-        except:
-            return "Failed to create the conference"
-
-        string = join.replace("<uri>",dial['dial_standards'])
-        result= string.replace("<conf-id>",dial['access_code_pstn'])
     return result
 
 
-
-"""
+def makeConference(slack,user,data):
+                               
+    starleafConference = {'title': 'conf',
+    'description': 'This conference was created from Slack.',
+    'timezone': 'UTC',
+    'permanent': False,
+    'start': " ",
+    'end': " ",
+    'participants': [ ],   }
     
-web = \
+    print "NEW Spawned Process:"
+
+    channel_id=data.get("channel_id")
+    name = data.get("user_name")
+    dom=data.get("team_domain")
+    chan=data.get("channel_name")
+                               
+    star = StarLeafClient(username=user.email,password=user.password,apiServer=apiServer)
+    if not star.authenticate():
+        user.error = " Failed to autheticate"
+        print "KILL faled to authentivate"
+        user.save()
+        return
+    
+    print "Authenticated"
+
+    starleafConference['title'] = name+" "+chan+" "+dom                  # start building the conference
+    starleafConference['start'] = datetime.utcnow().isoformat()
+    starleafConference['end'] =  (datetime.utcnow() + timedelta(minutes=5)).isoformat()
+
+    ch_body = slack.getChannel(channel_id)          # grabe the channel details
+    members = ch_body['channel']['members']     #then go through the memenbers
+    for uid in members:
+        guest = look_up_user(uid)
+        if guest:
+            guest = {"email": guest.email}    # if they have a different SL address then add that too
+        else:
+            gst_body = slack.getUser(uid)                                # get the users details
+            dest = {"email":gst_body['user']['profile']['email']}       #mainly emai address
+        starleafConference['participants'].append(dest)                # add to list odf invitees
+    conf = star.createConf(starleafConference)
+    try:
+        dial = conf['dial_info']
+    except:
+       user.error = "KILL Failed to create conf"
+       user.save()
+       return
+    
+    url = data.get("response_url")
+    uri = join.replace("<uri>",dial['dial_standards'])
+    conf = uri.replace("<conf-id>",dial['access_code_pstn'])
+    post = conf.replace("<uid>",uid)
+                               
+    session = requests.Session()
+    parms = {"text":post}
+    print json_log(parms)
+    print "URL is ", url
+    r = session.post(url,headers=deaders,data=parms)
+    if r.status_code != 200:
+        user.error = "POST error "+str(r.status_code)
+        usr.save()
+    print r.body
+    print "KILL normal"
+    return
+
+
+
+
+
+web0 = \
 {   "channel_id":"C0489SNJ9",
     "team_domain":"mycomp",
     "channel_name":"thischannel",
     "user_name":"Fred",
     "user_id" :"U0G0Y8D7A",
     "command":"/starleaf",
-    "text":"pw=freddy"
+    "text":""
+}
+
+
+web1 = \
+{   "channel_id":"C0489SNJ9",
+    "team_domain":"mycomp",
+    "channel_name":"thischannel",
+    "user_name":"Fred",
+    "user_id" :"U0G0Y8D7A",
+    "command":"/starleaf",
+    "text":"pw=fred"
+}
+
+
+web2 = \
+{   "channel_id":"C0489SNJ9",
+    "team_domain":"mycomp",
+    "channel_name":"thischannel",
+    "user_name":"Fred",
+    "user_id" :"U0G0Y8D7A",
+    "command":"/starleaf",
+    "text":""
 }
 
 
 
-print StarLeafSlack(web)
-exit()
 
-slack = SlackClient("xoxp-4281906585-4695033383-16028628019-ca364cc223", "https://slack.com/api/")
-if not slack.authenticate():
-    exit()
-b = slack.getChannels()
-for i in range(10):
-    ch = b['channels'][i]['id']
-    b = slack.getChannel(ch)
-    m = b['channel']['members']
-    for u in m:
-        b = slack.getUser(u)
-        if b:
-            e = b['user']['profile']['email']
-            n = b['user']['name']
-            print u," ",n," has email: ",e
-"""
+#print StarLeafSlack(web0)
 
-                         
 
                          
                          
