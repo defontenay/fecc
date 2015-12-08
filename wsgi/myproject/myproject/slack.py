@@ -25,8 +25,8 @@ apiServer='https://portal.starleaf.com/v1'
 token = "xoxp-4281906585-4695033383-16028628019-ca364cc223"
 
 join =      "<@<uid>> has invited you to a StaLeaf video call\n"
-join +=     "From Breeze click  <https://portal.starleaf.com/breezelinks/redirect?dial=<uri>|here\n"
-join +=     "or press the green button, or dial <conf-id>\n"
+join +=     "From Breeze click  <https://portal.starleaf.com/breezelinks/redirect?dial=<uri>|here>\n"
+join +=     "or press the green button, or dial <conf-id> on StarLeaf\n"
 join +=     "from your telephone, dial USA:+1 888 998 5260 or UK:+44 330 828 0796 and enter access code *<conf-id>*"
 
 def log(logdata,header=""):
@@ -163,7 +163,7 @@ def StarLeafSlack(data):
             if m2:
                 user.email= m2.group(1)
                 print "found an email ",user.email
-                result += "Your pasword has been saved\n"
+                result += "Your alternative email has been saved\n"
             user.save()
                                  
         if user.password == "":
@@ -241,7 +241,7 @@ def makeConference(slack,user,data):
     post = conf.replace("<uid>",uid)
                                
     session = requests.Session()
-    parms = json.dumps( {"text":post} )
+    parms = json.dumps( {"text":post, "response_type": "in_channel"} )
     print "URL is ", url
     r = session.post(url,headers=headers,data=parms)
     print "RETURN ",r.status_code
