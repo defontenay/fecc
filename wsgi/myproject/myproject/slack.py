@@ -130,7 +130,7 @@ class SlackClient(object):
     
     @staticmethod
     def _getBody(response):
-        log ( str(response.status_code),'Response code is:' )
+        #log ( str(response.status_code),'Response code is:' )
         try:
             body = response.json()
         except ValueError:
@@ -308,7 +308,7 @@ def makeConference(slack,user,data):
     uri = join.replace("<uri>",dial['dial_standards'])
     conf = uri.replace("<conf-id>",dial['access_code_pstn'])
     last = conf.replace("<url>",dial['dial_info_url'])
-    post = last.replace("<uid>",uid)
+    post = last.replace("<uid>",name)
                                
     session = requests.Session()
     parms = json.dumps( {"text":post, "response_type": "in_channel"} )

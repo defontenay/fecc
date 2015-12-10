@@ -290,7 +290,7 @@ def slack(request):
         HttpResponse("Failure")
     log ("REQUEST FROM SLACK")
     r = StarLeafSlack(data)
-    log(r,"BACK TO SLACK")
+    log(r,"BACK TO SLACK\n")
     return HttpResponse(r)
 
 
