@@ -12,28 +12,32 @@ import pytz
 import time
 import warnings
 import threading
-from starleaf import StarLeafClient
 from datetime import datetime, timedelta
+from settings import LOGFILE, STATIC_ROOT
+from starleaf import StarLeafClient
 from users.models import User
 
 
 
 headers = {'Content-type': 'application/json'}
-LOGFILE = "./satic.log"
 warnings.filterwarnings("ignore")
 apiServer='https://portal.starleaf.com/v1'
-token = "xoxp-4281906585-4695033383-16028628019-ca364cc223"
+token = "xoxp-4281906585-16032285248-16324528194-a1f404b085"
 
 help_text =  "This creates a new StarLeaf conference, with you as moderator\n"
 help_text+=  "Users will get a Breeze link to click and the dial-in number\n"
 help_text+=  "for PSTN. All members of this channel will get a Green Button\n"
-help_text+=  "if they are a StarLeaf user. Its named after the Channel"
-help_text+=  "You need to tell me your StarLeaf password by typing/n"
-help_text+=  "     */starleaf pw=password*   \n"
+help_text+=  "if they are a StarLeaf user. Its named after this Slack Channel\n"
+help_text+=  "You need to tell me your StarLeaf password by typing\n"
+help_text+=  "     */starleaf   pw=password*   \n"
 help_text+=  "and if you use a different email on StaLeaf tell me that too\n"
-help_text+=  "     */starleaf em=my@email.ad pw=password*   \n"
+help_text+=  "     */starleaf   em=my@email.com    pw=password*   \n"
 help_text+=  "If you set the wrog email or password you can reset it with.. \n"
-help_text+=  "     */starleaf delete*   \n"
+help_text+=  "     */starleaf   delete*   \n"
+help_text+=  "to make a longer conference add the length, in mins or hours e.g.\n"
+help_text+=  "     */starleaf   h=1 m=30*  (default is m=5) \n"
+help_text+=  "you can invite other people (not in this channel) too \n"
+help_text+=  "     */starleaf   u=will@starleaf.com,fred@gmail.com  *   \n"
 
 
 
@@ -44,18 +48,6 @@ join +=     "- from a phone, dial the local number and use the code *<conf-id>*\
 join +=     "- Local numbers are.. USA:+1 888 998 5260 or UK:+44 330 828 0796\n"
 join +=     " -With Lync, H.323 or SIP dial <uri>\n"
 
-
-def log(logdata,header=""):
-    print  header, logdata
-
-
-def json_log(logdata,header=""):
-    try:
-        string = json.dumps(logdata, sort_keys=True, indent=4, separators=(',', ': '))
-    except:
-        string = "No JSON"
-    print header
-    print string
 
 class SlackClient(object):
     """
@@ -104,8 +96,8 @@ class SlackClient(object):
         except ValueError:
             return None
         else:
-            #            json_log (body,"RESPONSE")
             if not body['ok']:
+                json_log (body,"ERROR RESPONSE")
                 return None
             return body
 
@@ -145,7 +137,8 @@ def make_user(id):
 def StarLeafSlack(data):
     slack = SlackClient(token, "https://slack.com/api/")
     if not slack.authenticate():
-        return "Cloud error"
+        log ("Slack error, failed to authenticate - maybe token?")
+        return "Cloud TOKEN error"
     user_id=data.get('user_id')
     text=data.get('text')
 
@@ -168,20 +161,21 @@ def StarLeafSlack(data):
         if not user or len(user.password) is 0:
             email = body['user']['profile']['email']
             if user:
-                print "user ",email," did not set PW "
-            print text, " no previous pw set for ", email
-            m1 = re.search('pw=(\S+)', text)
-            m2 = re.search('em=([a-zA-Z0-9-.+_]{1,64}@[a-zA-Z0-9-.]{3,62})', text)
+                log(email," did not set PW ")
+            else:
+                log ( email, " no previous entry set for ")
+            m1 = re.search(r'pw=(\S+)', text)
+            m2 = re.search(r'em=([a-zA-Z0-9-.+_]{1,64}@[a-zA-Z0-9-.]{3,62})', text)
             if not user:
                 user = make_user(user_id)
                 user.email = email
             if m1:
                 user.password = m1.group(1)
-                print "found a password ",user.password
+                log( "found a password ",user.password )
                 result += "Your pasword has been saved\n"
             if m2:
                 user.email= m2.group(1)
-                print "found an email ",user.email
+                log ( "found an email ",user.email )
                 result += "Your alternative email has been saved\n"
             user.save()
                                  
@@ -216,25 +210,43 @@ def makeConference(slack,user,data):
     'end': " ",
     'participants': [ ],   }
     
-    print "NEW Spawned Process: ", user.slack, " em  ",user.email,"  pw  ",user.password
+    log( user.slack+ " em  "+user.email+"  pw  "+user.password,"NEW Spawned Process: " )
 
     channel_id=data.get("channel_id")
     name = data.get("user_name")
     dom=data.get("team_domain")
     chan=data.get("channel_name")
+    text=data.get('text')
                                
     star = StarLeafClient(username=user.email,password=user.password,apiServer=apiServer)
     if not star.authenticate():
         user.error = " Failed to autheticate"
-        print "KILL faled to authentivate"
+        log( "KILL -SL faled to authentivate")
         user.save()
         return
     
-    print "Authenticated"
+    log ("SL Authenticated")
 
-    starleafConference['title'] = name+" "+chan+" "+dom                  # start building the conference
+    m1 = re.search('m=([0-9]{1,2})', text)
+    h1 = re.search('h=([0-9]{1,2})', text)
+
+    mins = 0
+    if m1:
+        mins += int(m1.group(1))
+    if h1:
+        mins += 60*(int(m1.group(1)))
+    if mins == 0:
+        mins = 2
+
+    ems = re.findall(r'(?:u=|(?<=,))([a-zA-Z0-9-.+_]{1,64}@[a-zA-Z0-9-.]{3,62})(?:,|\s|$)+', text)
+    for em in ems:
+        print "adding email...",em
+        dest = {"email":em}
+        starleafConference['participants'].append(dest)
+
+    starleafConference['title'] = chan                 # start building the conference
     starleafConference['start'] = datetime.utcnow().isoformat()
-    starleafConference['end'] =  (datetime.utcnow() + timedelta(minutes=5)).isoformat()
+    starleafConference['end'] =  (datetime.utcnow() + timedelta(minutes=mins)).isoformat()
 
     ch_body = slack.getChannel(channel_id)          # grabe the channel details
     members = ch_body['channel']['members']     #then go through the memenbers
@@ -251,6 +263,7 @@ def makeConference(slack,user,data):
         dial = conf['dial_info']
     except:
        user.error = "KILL Failed to create conf"
+       leg("KILL failed to create SL conf")
        user.save()
        return
     
@@ -261,19 +274,55 @@ def makeConference(slack,user,data):
                                
     session = requests.Session()
     parms = json.dumps( {"text":post, "response_type": "in_channel"} )
-    print "URL is ", url
+
     r = session.post(url,headers=headers,data=parms)
-    print "RETURN ",r.status_code
-    print "TEXT : ",r.text
+
     if r.status_code != 200:
         user.error = "POST error "+str(r.status_code)
         user.save()
-    print "KILL normal"
+    log ( str(r.status_code),"  KILL normal")
     return
 
 
 
-                         
+###############################################################################
+
+def log(logdata,header=""):
+    log = open(LOGFILE, 'a')
+    log.write(str(datetime.now())+"--------------------\n")
+    log.write (header)
+    if "static" in LOGFILE:
+        print  header, logdata
+    if logdata:
+        log.write(logdata)
+    else:
+        log.write("None")
+    log.write("\n")
+    log.close()
+    return 0
+
+
+
+def json_log(logdata,header=""):
+    log = open(LOGFILE, 'a')
+    log.write(str(datetime.now())+"--------------------\n")
+    if len(header) > 0:
+        log.write(header+"\n")
+    try:
+        string = json.dumps(logdata, sort_keys=True, indent=4, separators=(',', ': '))
+    except:
+        string = "No JSON"
+    log.write(string)
+    if "static" in LOGFILE:
+        print header
+        print string
+    log.write("\n")
+    log.close()
+    return 0
+
+
+
+
 
 
 

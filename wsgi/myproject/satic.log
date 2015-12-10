@@ -1,0 +1,24 @@
+2015-12-09 23:24:15.235766--------------------
+ERROR RESPONSE
+{
+    "error": "invalid_auth",
+    "ok": false
+}
+2015-12-09 23:24:15.236061--------------------
+Slack error, failed to authenticate - maybe token?
+2015-12-09 23:25:57.533556--------------------
+ERROR RESPONSE
+{
+    "error": "invalid_auth",
+    "ok": false
+}
+2015-12-09 23:25:57.533939--------------------
+Slack error, failed to authenticate - maybe token?
+2015-12-09 23:26:36.433156--------------------
+ERROR RESPONSE
+{
+    "error": "invalid_auth",
+    "ok": false
+}
+2015-12-09 23:26:36.433537--------------------
+Slack error, failed to authenticate - maybe token?

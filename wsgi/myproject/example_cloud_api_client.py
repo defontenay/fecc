@@ -7,29 +7,6 @@ import json
 
 
 
-web1 = \
-{   "channel_id":"C0489SNJ9",
-    "team_domain":"mycomp",
-    "channel_name":"thischannel",
-    "user_name":"Fred",
-    "user_id" :"U0G0Y8D7A",
-    "command":"/starleaf",
-        "response_url":"http://127.0.0.0:8000/",
-    "text":""
-}
-
-
-
-web2 = \
-{   "channel_id":"C0489SNJ9",
-    "team_domain":"mycomp",
-    "channel_name":"thischannel",
-    "user_name":"Fred",
-    "user_id" :"U0G0Y8D7A",
-    "command":"/starleaf",
-     "response_url":"http://127.0.0.0:8000/",
-    "text":"pw=wombat em=william.macdonald@starleaf.com"
-}
 
 web0 = \
 {   "channel_id":"C0489SNJ9",
@@ -39,7 +16,7 @@ web0 = \
     "user_id" :"U0G0Y8D7A",
     "command":"/starleaf",
         "response_url":"http://127.0.0.0:8000/",
-    "text":"delete-all"
+    "text":"m=23  u=will@starleaf.com,fred@me.org"
 }
 
 
@@ -60,26 +37,3 @@ if c == 500:
     exit()
 else:
     print 'Body text is:\n', t
-raw_input()
-r = session.get(url,params=web1, headers=headers)
-c=r.status_code
-t=r.text
-print 'Response code is:', c
-if c == 500:
-    i = t.find('<div id="summary">')
-    print t[i:i+300]
-    exit()
-else:
-    print 'Body text is: \n', t
-raw_input()
-r = session.get(url,params=web2, headers=headers)
-c=r.status_code
-t=r.text
-print 'Response code is:', c
-if c == 500:
-    i = t.find('<div id="summary">')
-    print t[i:i+300]
-    exit()
-else:
-    print 'Body text is: \n', t
-
