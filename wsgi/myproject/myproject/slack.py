@@ -46,7 +46,47 @@ join +=     "- Breeze users can click  <https://portal.starleaf.com/breezelinks/
 join +=     "- Or press the green button, or dial <conf-id> on StarLeaf\n"
 join +=     "- from a phone, dial the local number and use the code *<conf-id>*\n"
 join +=     "- Local numbers are.. USA:+1 888 998 5260 or UK:+44 330 828 0796\n"
-join +=     " -With Lync, H.323 or SIP dial <uri>\n"
+join +=     " -With Lync, H.323 or SIP dial <uri> or click <<url>|here>\n "
+
+
+
+
+###############################################################################
+
+def log(logdata,header=""):
+    log = open(LOGFILE, 'a')
+    log.write(str(datetime.now())+"--------------------\n")
+    if len(header) > 0:
+        log.write(header+"\n")
+    if "static" in LOGFILE:
+        print  header, logdata
+    if logdata:
+        log.write(logdata)
+    else:
+        log.write("None")
+    log.write("\n")
+    log.close()
+    return 0
+
+
+
+def json_log(logdata,header=""):
+    log = open(LOGFILE, 'a')
+    log.write(str(datetime.now())+"--------------------\n")
+    if len(header) > 0:
+        log.write(header+"\n")
+    try:
+        string = json.dumps(logdata, sort_keys=True, indent=4, separators=(',', ': '))
+    except:
+        string = "No JSON"
+    log.write(string)
+    if "static" in LOGFILE:
+        print header
+        print string
+    log.write("\n")
+    log.close()
+    return 0
+
 
 
 class SlackClient(object):
@@ -90,7 +130,7 @@ class SlackClient(object):
     
     @staticmethod
     def _getBody(response):
-        #   log ( str(response.status_code),'Response code is:' )
+        log ( str(response.status_code),'Response code is:' )
         try:
             body = response.json()
         except ValueError:
@@ -161,14 +201,13 @@ def StarLeafSlack(data):
         if not user or len(user.password) is 0:
             email = body['user']['profile']['email']
             if user:
-                log(email," did not set PW ")
+                log(email," has not set PW ")
             else:
+                user = make_user(user_id)
+                user.email = email
                 log ( email, " no previous entry set for ")
             m1 = re.search(r'pw=(\S+)', text)
             m2 = re.search(r'em=([a-zA-Z0-9-.+_]{1,64}@[a-zA-Z0-9-.]{3,62})', text)
-            if not user:
-                user = make_user(user_id)
-                user.email = email
             if m1:
                 user.password = m1.group(1)
                 log( "found a password ",user.password )
@@ -179,10 +218,8 @@ def StarLeafSlack(data):
                 result += "Your alternative email has been saved\n"
             user.save()
                                  
-        if user.password == "":
+        if len(user.password) == 0:
             string =   "Use */starleaf pw=pass* where pass is your Breeze password"
-            #  string +=   "If "+email+" is not your StarLeaf email then...\n"
-            #  string +=   "Use */starleaf pw=password em=me@dom.com* where me@dom.com is your StarLeaf email"
             return string
                                  
         if user.error != "":
@@ -236,11 +273,10 @@ def makeConference(slack,user,data):
     if h1:
         mins += 60*(int(m1.group(1)))
     if mins == 0:
-        mins = 2
+        mins = 5
 
     ems = re.findall(r'(?:u=|(?<=,))([a-zA-Z0-9-.+_]{1,64}@[a-zA-Z0-9-.]{3,62})(?:,|\s|$)+', text)
     for em in ems:
-        print "adding email...",em
         dest = {"email":em}
         starleafConference['participants'].append(dest)
 
@@ -258,69 +294,31 @@ def makeConference(slack,user,data):
             gst_body = slack.getUser(uid)                                # get the users details
             dest = {"email":gst_body['user']['profile']['email']}       #mainly emai address
         starleafConference['participants'].append(dest)                # add to list odf invitees
+    json_log(starleafConference,"STARLEAF CREATE")
     conf = star.createConf(starleafConference)
     try:
         dial = conf['dial_info']
     except:
        user.error = "KILL Failed to create conf"
-       leg("KILL failed to create SL conf")
+       log("KILL failed to create SL conf")
        user.save()
        return
     
     url = data.get("response_url")
     uri = join.replace("<uri>",dial['dial_standards'])
     conf = uri.replace("<conf-id>",dial['access_code_pstn'])
-    post = conf.replace("<uid>",uid)
+    last = conf.replace("<url>",dial['dial_info_url'])
+    post = last.replace("<uid>",uid)
                                
     session = requests.Session()
     parms = json.dumps( {"text":post, "response_type": "in_channel"} )
-
     r = session.post(url,headers=headers,data=parms)
 
     if r.status_code != 200:
         user.error = "POST error "+str(r.status_code)
         user.save()
-    log ( str(r.status_code),"  KILL normal")
+    log ( str(r.status_code)," KILL success")
     return
-
-
-
-###############################################################################
-
-def log(logdata,header=""):
-    log = open(LOGFILE, 'a')
-    log.write(str(datetime.now())+"--------------------\n")
-    log.write (header)
-    if "static" in LOGFILE:
-        print  header, logdata
-    if logdata:
-        log.write(logdata)
-    else:
-        log.write("None")
-    log.write("\n")
-    log.close()
-    return 0
-
-
-
-def json_log(logdata,header=""):
-    log = open(LOGFILE, 'a')
-    log.write(str(datetime.now())+"--------------------\n")
-    if len(header) > 0:
-        log.write(header+"\n")
-    try:
-        string = json.dumps(logdata, sort_keys=True, indent=4, separators=(',', ': '))
-    except:
-        string = "No JSON"
-    log.write(string)
-    if "static" in LOGFILE:
-        print header
-        print string
-    log.write("\n")
-    log.close()
-    return 0
-
-
 
 
 

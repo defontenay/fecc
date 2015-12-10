@@ -288,8 +288,10 @@ def slack(request):
         data = request.GET.copy()
     else:
         HttpResponse("Failure")
-    
-    return HttpResponse(StarLeafSlack(data))
+    log ("REQUEST FROM SLACK")
+    r = StarLeafSlack(data)
+    log(r,"BACK TO SLACK")
+    return HttpResponse(r)
 
 
 ###############################################################################

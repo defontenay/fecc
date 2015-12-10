@@ -41,7 +41,7 @@ class StarLeafClient(object):
     def _put(self, path, body):
         r = self.session.put(self.apiServer + path, data=json.dumps(body), headers=headers, verify=self.sslVerify)
         if r.status_code == 401:
-            txt_log ("SL Need to authenticate")
+            print ("SL Need to authenticate")
             self.authenticate()
             r = self.session.put(self.apiServer + path, data=json.dumps(body), headers=headers, verify=self.sslVerify)
         return self._getBody(r)
@@ -55,13 +55,13 @@ class StarLeafClient(object):
     
     @staticmethod
     def _getBody(response):
-        txt_log ('SL Response code is:' + str(response.status_code))
+        #       print ('SL Response code is:' + str(response.status_code))
         try:
             body = response.json()
         except ValueError:
             return None
         else:
-            json_log (body)
+            #     json_log (body)
             return body
 
     def _apiAuthentication(self, salt_hex, iterations, challenge_hex):
@@ -86,7 +86,7 @@ class StarLeafClient(object):
                                                        body['challenge'])
             postBody = { 'username': self.username,
                         'response': authResponse}
-            txt_log ('SL Sending challenge response to API server.')
+            print ('SL Sending challenge response to API server.')
             b = self._post('/authenticate', postBody)
             if b and "error" in b:
                 return None
@@ -95,56 +95,48 @@ class StarLeafClient(object):
     def createGreenButton(self, settings, confId):
             postBody = {'settings': settings}
             url = self.apiServer + "/myconferences/" + confId
-            txt_log ("url is  "+url)
-            json_log(settings)
+            print ("url is  "+url)
+            #     json_log(settings)
             try:
                 r = self.session.put(url, data=json.dumps(postBody), headers=headers, verify=self.sslVerify)
                 self._getBody(r)
             except Exception as e:
-                txt_log ("Cloud API error "+e.message)
+                print ("Cloud API error "+e.message)
 
 
     def deleteGreenButton(self, confId):
             url = self.apiServer + "/myconferences/" + confId
-            txt_log ("url is  "+url)
+            #    txt_log ("url is  "+url)
             try:
                 r = self.session.delete(self.apiServer + "/myconferences/" + confId, verify=self.sslVerify)
                 self._getBody(r)
             except Exception as e:
-                txt_log ("Cloud API error"+e.message)
+                print ("Cloud API error"+e.message)
 
 
     def createConf(self, settings):
-        print('Creating conference.')
+        #log('Creating conference.')
         postBody = {'settings': settings}
         respBody = self._post('/myconferences', postBody)
         if respBody is not None and respBody.get('conf_id') is not None:
-            print('New conference created with id: %s' % respBody['conf_id'])
+            print('New SL conference created with id: %s' % respBody['conf_id'])
         return respBody
 
     def updateConf(self, confId, settings):
-        print('Changing conference with id: %s' % confId)
+        #print('Changing conference with id: %s' % confId)
         postBody = {'settings': settings}
         self._put('/myconferences/%s' % confId, postBody)
 
     def deleteConf(self, confId):
-        print('Deleting conference with id: %s' % confId)
+        # print('Deleting conference with id: %s' % confId)
         self._delete('/myconferences/%s' % confId)
 
     def getConf(self, confId):
-        print('Getting conference info with id: %s' % confId)
+        #    print('Getting conference info with id: %s' % confId)
         return self._get('/myconferences/%s' % confId)
 
 
 
 
-###############################################################################
-def txt_log(logdata):
-        print logdata
-
-
-###############################################################################
-def json_log(logdata):
-        print json.dumps(logdata, sort_keys=True, indent=4, separators=(',', ': '))
 
 warnings.filterwarnings("ignore")
