@@ -22,7 +22,7 @@ from users.models import User
 headers = {'Content-type': 'application/json'}
 warnings.filterwarnings("ignore")
 apiServer='https://portal.starleaf.com/v1'
-token = "xoxp-4281906585-16032285248-16324528194-a1f404b085"
+token = "YzFiMzFmZjItYjdmOC00ZmI5LTg1NTktMjYyNjgyYzIyNDM2Y2IxM2YzMTMtNDFj"
 
 help_text =  "This creates a new StarLeaf conference, with you as moderator\n"
 help_text+=  "Users will get a Breeze link to click and the dial-in number\n"
@@ -247,13 +247,14 @@ def makeConference(slack,user,data):
     'end': " ",
     'participants': [ ],   }
     
+    log( user.slack+ " em  "+user.email+"  pw  "+user.password,"NEW Spawned Process: " )
+
     channel_id=data.get("channel_id")
     name = data.get("user_name")
     dom=data.get("team_domain")
     chan=data.get("channel_name")
     text=data.get('text')
-    log("user "+ user.slack+ " em  "+user.email+"  pw  "+user.password+" ch "+channel_id+" dom "+dom+" chn "+chan,"NEW SPAWN " )
-    
+                               
     star = StarLeafClient(username=user.email,password=user.password,apiServer=apiServer)
     if not star.authenticate():
         user.error = " Failed to autheticate"
@@ -284,11 +285,6 @@ def makeConference(slack,user,data):
     starleafConference['end'] =  (datetime.utcnow() + timedelta(minutes=mins)).isoformat()
 
     ch_body = slack.getChannel(channel_id)          # grabe the channel details
-    if not ch_body:
-        user.error = "Problem looking up channel"
-        log("Channel ERROR", )
-        user.save()
-        return
     members = ch_body['channel']['members']     #then go through the memenbers
     for uid in members:
         guest = look_up_user(uid)
