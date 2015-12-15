@@ -183,6 +183,7 @@ def email(request):
         return HttpResponse('Invalid method')
             
     try:
+        log(request.body,"RAW")
         data = request.POST.copy()
         att = data.get('attachments',0)
         env  = json.loads(data['envelope'])
@@ -210,16 +211,11 @@ def email(request):
                 json_log(file,"FILE")
                 if 'filename' in file and ".ics" in file['filename']:
                     ics_file = request.FILES.get(name)
-                    print name," ... ",ics_file
                     ics = ics_file.read()
-                    print ics
                     break;
 
 
         if not ics:
-            if request.FILES:
-                for f in request.FILES:
-                    log(f,"FILES")
             return HttpResponse("no ICS")
 
         log ("found an ICS .... "+file['name']+" size "+str(len(ics)))
@@ -232,7 +228,6 @@ def email(request):
                 uid = event.get('UID')
                 log ( uid, "UID" )
                 
-
                 uri = None
                 if method == 'REQUEST':
                     if "bluejeans" in env["from"]:
