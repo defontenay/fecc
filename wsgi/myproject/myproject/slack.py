@@ -285,11 +285,9 @@ def makeConference(slack,user,data):
 
     ch_body = slack.getChannel(channel_id)          # grabe the channel details
     if not ch_body:
-        user.error = "Problem looking up channel"
-        log("Channel ERROR", )
-        user.save()
-        return
-    members = ch_body['channel']['members']     #then go through the memenbers
+        members =[]
+    else:
+        members = ch_body['channel']['members']     #then go through the memenbers
     for uid in members:
         guest = look_up_user(uid)
         if guest:
@@ -303,10 +301,10 @@ def makeConference(slack,user,data):
     try:
         dial = conf['dial_info']
     except:
-       user.error = "KILL Failed to create conf"
-       log("KILL failed to create SL conf")
-       user.save()
-       return
+        user.error = "KILL Failed to create conf"
+        log("KILL failed to create SL conf")
+        user.save()
+        return
     
     url = data.get("response_url")
     uri = join.replace("<uri>",dial['dial_standards'])
