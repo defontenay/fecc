@@ -106,16 +106,40 @@ slack.authenticate()
 slack.getChannels()
 exit()
 """
+
+files = { \
+    "attachment1": {
+        "filename": "new.ics",
+        "name": "new.ics",
+        "type": "text/calendar"
+    },
+    "attachment2": {
+        "charset": "us-ascii",
+        "type": "text/html"
+    }
+}
+
+email = { \
+"headers":'this is headers',
+"to":'fred@fred.com',
+"subject":'thi is subuj',
+"envelope":json.dumps({"to":'fred@fred.com',"from":'john@webex.com'}),
+"attachments":2,
+"attachment-info":json.dumps(files)
+}
+
                              
                              
 headers = {'Content-type': 'application/json'}
+headers = {'Content-type': 'multipart/form-data'}
+
 session = requests.Session()
-url='http://127.0.0.1:8000/slack/'
-#
-#f = open("/users/will/new.ics",'rb')
-#files = {'attachment2':f  }
-#r = session.post(url,data=email,files=files, verify=False)
-r = session.get(url,params=web0, headers=headers)
+url='http://127.0.0.1:8000/email/'
+f = open("/users/will/new.ics",'rb')
+files = {'attachment2':f , 'attachment1':f}
+print f.read()
+r = session.post(url,data=email,files=files, verify=False)
+#r = session.get(url,params=web0, headers=headers)
 c=r.status_code
 t=r.text
 print 'Response code is:', c
