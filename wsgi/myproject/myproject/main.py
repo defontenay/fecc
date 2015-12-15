@@ -189,12 +189,12 @@ def email(request):
         sub = data.get('subject',"*****")
         ics = None
         att = int(att)
-        if request.FILES:
-            for f in request.FILES:
+        if data.FILES:
+            for f in data.FILES:
                 json_log(f,"ALL FILES")
         json_log(env,"ENVELOPE")
         if att == 0:
-            log (request.body,"BODY")
+            log (data,"BODY (no attachments)")
         else:
             info = json.loads(data.get('attachment-info'))
             json_log(info,"ATTCHMENTS")
@@ -205,15 +205,15 @@ def email(request):
                 file = info[name]
                 json_log(file,"FILE")
                 if 'filename' in file and ".ics" in file['filename']:
-                    ics_file = request.FILES.get(name)
+                    ics_file = data.FILES.get(name)
                     print name," ",ics_file
                     ics = ics_file.read()
                     break;
 
 
         if not ics:
-            if request.FILES:
-                for f in request.FILES:
+            if data.FILES:
+                for f in data.FILES:
                     json_log(f,"ALL FILES")
             return HttpResponse("no ICS")
 
