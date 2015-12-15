@@ -187,8 +187,8 @@ def email(request):
         att = data.get('attachments',0)
         env  = json.loads(data['envelope'])
         sub = data.get('subject',"*****")
-        to = data.get('to')
-        cc = data.get('cc')
+        to = data.get('to',"")
+        cc = data.get('cc',"")
         log (to,"TO ")
         log (cc,"CC ")
         ics = None
