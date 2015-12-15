@@ -199,7 +199,7 @@ def email(request):
                 log (f, "FILE")
         json_log(env,"ENVELOPE")
         if att == 0:
-            log (data,"BODY (no attachments)")
+            log ("","BODY (no attachments)")
         else:
             info = json.loads(data.get('attachment-info'))
             json_log(info,"ATTCHMENTS")
