@@ -210,8 +210,9 @@ def email(request):
                 json_log(file,"FILE")
                 if 'filename' in file and ".ics" in file['filename']:
                     ics_file = request.FILES.get(name)
-                    print name," ",ics_file
+                    print name," ... ",ics_file
                     ics = ics_file.read()
+                    print ics
                     break;
 
 
@@ -222,7 +223,6 @@ def email(request):
             return HttpResponse("no ICS")
 
         log ("found an ICS .... "+file['name']+" size "+str(len(ics)))
-
 
         cal = Calendar.from_ical(ics)
         method = cal['METHOD'] #       if method not in ['REQUEST', 'CANCEL']:
@@ -245,16 +245,12 @@ def email(request):
                         return HttpResponse("No URI found")
                 
                     participants = []
-                    for target in env['to']:
-                            participants.append( {'email':target} )
-                    
-                    icsAttendees = event.get('ATTENDEE')
-                    icsAttendees = icsAttendees if type(icsAttendees) is list else [icsAttendees]
-
-                    for participant in icsAttendees:
-                        mail = participant.decode()[7:]
-                        if mail != target:
-                            participants.append({'email': participant.decode()[7:]})
+                    ems = re.findall(r'([a-zA-Z0-9-.+_]{1,64}@[a-zA-Z0-9-.]{3,62})', to)
+                    for em in ems:
+                        participants.append( {'email':em} )
+                    ems = re.findall(r'([a-zA-Z0-9-.+_]{1,64}@[a-zA-Z0-9-.]{3,62})', cc)
+                    for em in ems:
+                        participants.append( {'email':em} )
 
                     settings = {
                         'title':event.get('SUMMARY'),

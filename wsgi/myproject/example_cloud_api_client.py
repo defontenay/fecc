@@ -112,19 +112,16 @@ files = { \
         "filename": "new.ics",
         "name": "new.ics",
         "type": "text/calendar"
-    },
-    "attachment2": {
-        "charset": "us-ascii",
-        "type": "text/html"
     }
 }
 
 email = { \
 "headers":'this is headers',
-"to":'fred@fred.com',
+"to":'new@cloud.sl, William MacDonald <william.macdonald@gmail.com>, William MacDonald <william.macdonald@starleaf.com>',
+"cc":"fred@fred",
 "subject":'thi is subuj',
 "envelope":json.dumps({"to":'fred@fred.com',"from":'john@webex.com'}),
-"attachments":2,
+"attachments":1,
 "attachment-info":json.dumps(files)
 }
 
@@ -136,8 +133,7 @@ headers = {'Content-type': 'multipart/form-data'}
 session = requests.Session()
 url='http://127.0.0.1:8000/email/'
 f = open("/users/will/new.ics",'rb')
-files = {'attachment2':f , 'attachment1':f}
-print f.read()
+files = {'attachment1':f}
 r = session.post(url,data=email,files=files, verify=False)
 #r = session.get(url,params=web0, headers=headers)
 c=r.status_code
