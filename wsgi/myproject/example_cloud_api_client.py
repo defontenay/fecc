@@ -32,7 +32,7 @@ class SlackClient(object):
     def _get(self, path, params=None):
         r = self.session.get(self.apiServer + path, params=params, verify=self.sslVerify)
         return self._getBody(r)
-    
+
     def _post(self, path, body):
         r = self.session.post(self.apiServer + path, data=json.dumps(body), headers=headers, verify=self.sslVerify)
         return self._getBody(r)
@@ -97,7 +97,7 @@ web0 = \
     "user_id" :"U0G0Y8D7A",
     "command":"/starleaf",
         "response_url":"http://127.0.0.0:8000/",
-    "text":"m=1  u=will@starleaf.com,fred@me.org"
+    "text":"delete-all"
 }
 
 """
@@ -115,6 +115,7 @@ files = { \
     }
 }
 
+
 email = { \
 "headers":'this is headers',
 "to":'new@cloud.sl, William MacDonald <william.macdonald@gmail.com>, William MacDonald <william.macdonald@starleaf.com>',
@@ -125,16 +126,19 @@ email = { \
 "attachment-info":json.dumps(files)
 }
 
+form = { "password":"wombat","user_id":"will@fred.com"}
                              
                              
 headers = {'Content-type': 'application/json'}
 headers = {'Content-type': 'multipart/form-data'}
 
 session = requests.Session()
-url='http://127.0.0.1:8000/email/'
-f = open("/users/will/new.ics",'rb')
-files = {'attachment1':f}
-r = session.post(url,data=email,files=files, verify=False)
+#url='http://127.0.0.1:8000/slack/'
+#f = open("/users/will/new.ics",'rb')
+#files = {'attachment1':f}
+url='http://127.0.0.1:8000/slack/'
+#r = session.post(url,data=email,files=files, verify=False)
+r = session.post(url,data=form,  headers=headers)
 #r = session.get(url,params=web0, headers=headers)
 c=r.status_code
 t=r.text

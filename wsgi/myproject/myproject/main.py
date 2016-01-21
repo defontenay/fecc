@@ -110,7 +110,6 @@ def pc(request):
     return HttpResponse(page)
 
 def serve_blank(request):
-    print "Got Request"
     return  HttpResponse(page)
 
 ###############################################################################
@@ -202,7 +201,7 @@ def email(request):
             log ("","BODY (no attachments)")
         else:
             info = json.loads(data.get('attachment-info'))
-            json_log(info,"ATTCHMENTS")
+            json_log(info,"ATTCHMENTS") 
             for x in range(1,att+1):
                 log (str(x))
                 name = "attachment"+str(x)
@@ -275,21 +274,7 @@ def email(request):
 
 ###############################################################################
 
-def slack(request):
-    
-    if request.method == 'POST':
-        data = request.POST.copy()
-    elif request.method == 'GET':
-        data = request.GET.copy()
-    else:
-        HttpResponse("Failure")
-    log ("REQUEST FROM SLACK")
-    r = StarLeafSlack(data)
-    log(r,"BACK TO SLACK\n")
-    return HttpResponse(r)
 
-
-###############################################################################
 
 def log(logdata,header=""):
     log = open(LOGFILE, 'a')

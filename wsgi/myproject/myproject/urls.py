@@ -15,10 +15,10 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from django.contrib import admin
-from myproject import main
+from myproject import main, slack
 
 urlpatterns = [
-               url(r'^admin/', include(admin.site.urls)),
+               url(r'^admin', include(admin.site.urls)),
                url(r'^poll', main.serve_poll),
                url(r'^left', main.left),
                url(r'^right', main.right),
@@ -28,6 +28,8 @@ urlpatterns = [
                url(r'^down', main.down),
                url(r'^pc', main.pc),
                url(r'^email', main.email),
-               url(r'^slack', main.slack),
+               url(r'^slack', slack.slack),
+               url(r'^slackpw', slack.slackpw),
+               url(r'^page?', slack.page),
                url(r'^', main.serve_blank)
 ]

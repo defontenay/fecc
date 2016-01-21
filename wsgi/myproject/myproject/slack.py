@@ -16,6 +16,8 @@ from datetime import datetime, timedelta
 from settings import LOGFILE, STATIC_ROOT
 from starleaf import StarLeafClient
 from users.models import User
+from django.http import HttpResponse, Http404
+from django.views.decorators.csrf import csrf_exempt
 
 
 
@@ -30,8 +32,8 @@ help_text+=  "for PSTN. All members of this channel will get a Green Button\n"
 help_text+=  "if they are a StarLeaf user. Its named after this Slack Channel\n"
 help_text+=  "You need to tell me your StarLeaf password by typing\n"
 help_text+=  "     */starleaf   pw=password*   \n"
-help_text+=  "and if you use a different email on StaLeaf tell me that too\n"
-help_text+=  "     */starleaf   em=my@email.com    pw=password*   \n"
+#help_text+=  "and if you use a different email on StaLeaf tell me that too\n"
+#help_text+=  "     */starleaf   em=my@email.com    pw=password*   \n"
 help_text+=  "If you set the wrog email or password you can reset it with.. \n"
 help_text+=  "     */starleaf   delete*   \n"
 help_text+=  "to make a longer conference add the length, in mins or hours e.g.\n"
@@ -48,8 +50,37 @@ join +=     "- from a phone, dial the local number and use the code *<conf-id>*\
 join +=     "- Local numbers are.. USA:+1 888 998 5260 or UK:+44 330 828 0796\n"
 join +=     " -With Lync, H.323 or SIP dial <uri> or click <<url>|here>\n "
 
+pw_page =' <html> <head> <title>StarLeaf Credentials</title> </head> \
+<body> \
+<form name="Account Details" action="/slackpw" method="POST"> \
+Slack IDl :\
+<br> <input type="text" name="user_id" value="<id>" size="20">      \
+<br><br> \
+StarLeaf Email :\
+<br> <input type="text" name="email" value="<email>" size="50">      \
+<br><br> \
+Enter StarLeaf Password : <br> <input type="password" name="password" size="25">    \
+<br><br>   \
+<input type="submit" value="submit"">  \
+</div> </form> </body> </html>'
 
 
+
+###############################################################################
+
+def page(data):
+    print data.META['HTTP_HOST']
+    if data.method != 'GET':
+        return HttpResponse('INVALID_METHOD')
+
+    try:
+        id = data.GET.get('user_id',"slackid")
+        email = data.GET.get('email',"email")
+        np1 = pw_page.replace("<email>",email)
+        np2 = np1.replace("<id>",id)
+        return HttpResponse(np2)
+    except:
+        return HttpResponse('Exception')
 
 ###############################################################################
 
@@ -182,6 +213,12 @@ def StarLeafSlack(data):
     user_id=data.get('user_id')
     text=data.get('text')
 
+    if not user_id:
+        return "No user id argument"
+
+    if not text:
+        text = ""
+
     if "delete-all" in text:
         l  = User.objects.all()
         for u in l:
@@ -219,7 +256,8 @@ def StarLeafSlack(data):
             user.save()
                                  
         if len(user.password) == 0:
-            string =   "Use */starleaf pw=pass* where pass is your Breeze password"
+    #        string =   "Use */starleaf pw=pass* where pass is your Breeze password"
+            string =  " click  <http://"+data.META['HTTP_HOST']+"/slackpw?user_id="+user_id+"&email="+email+">|here> to set password.....\n"
             return string
                                  
         if user.error != "":
@@ -323,7 +361,38 @@ def makeConference(slack,user,data):
     return
 
 
+###############################################################################
 
+
+@csrf_exempt
+def slackpw(request):
+    if request.method != 'POST':
+        return HttpResponse("not accepted")
+    email=data.get('email',"myemail")
+    id=data.get('user_id',"nousr")
+    pw =data.get('password',"wombat")
+    user = look_up_user(user_id)
+    if not user:
+        user = make_user(user_id)
+    user.password = pw
+    user.email = email
+    user.save()
+    return HttpResponse("StarLeaf password set")
+
+
+###############################################################################
+
+
+@csrf_exempt
+def slack(request):
+    if request.method == 'POST':
+        data = request.POST.copy()
+    elif request.method == 'GET':
+        data = request.GET.copy()
+    else:
+        HttpResponse("Failure")
+    r = StarLeafSlack(data)
+    return HttpResponse(r)
 
 
 
