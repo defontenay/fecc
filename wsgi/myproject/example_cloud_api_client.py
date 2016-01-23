@@ -89,7 +89,7 @@ class SlackClient(object):
 
 
 
-web0 = \
+web = \
 {   "channel_id":"C0G4HUYJ1",
     "team_domain":"mycomp",
     "channel_name":" NEWchannel",
@@ -97,7 +97,7 @@ web0 = \
     "user_id" :"U0G0Y8D7A",
     "command":"/starleaf",
         "response_url":"http://127.0.0.0:8000/",
-    "text":"delete-all"
+    "text":""
 }
 
 """
@@ -126,20 +126,31 @@ email = { \
 "attachment-info":json.dumps(files)
 }
 
-form = { "password":"wombat","user_id":"will@fred.com"}
+form = { "password":"wombat","user_id":"U0G0Y8D7A", "email":"will@fred.com"}
                              
                              
 headers = {'Content-type': 'application/json'}
 headers = {'Content-type': 'multipart/form-data'}
 
 session = requests.Session()
-#url='http://127.0.0.1:8000/slack/'
+print "calling..."
+url='http://127.0.0.1:8000/slack/'
+r = session.get(url,params=web)
+c=r.status_code
+t=r.text
+print 'Response code is:', c
+if c == 500:
+    i = t.find('<div id="summary">')
+    print t[i:i+300]
+    exit()
+else:
+    print 'Body text is:\n', t
+
 #f = open("/users/will/new.ics",'rb')
 #files = {'attachment1':f}
-url='http://127.0.0.1:8000/slack/'
+url='http://127.0.0.1:8000/slackpw/'
 #r = session.post(url,data=email,files=files, verify=False)
-r = session.post(url,data=form,  headers=headers)
-#r = session.get(url,params=web0, headers=headers)
+r = session.post(url,data=form)
 c=r.status_code
 t=r.text
 print 'Response code is:', c

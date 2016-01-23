@@ -13,7 +13,6 @@ from django.http import HttpResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
 from settings import LOGFILE, STATIC_ROOT
 from starleaf import StarLeafClient
-from slack import StarLeafSlack
 
 apiServer='https://portal.starleaf.com/v1'
 username="wmm+185@starleaf.com"
