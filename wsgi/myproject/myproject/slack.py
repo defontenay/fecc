@@ -25,7 +25,6 @@ headers = {'Content-type': 'application/json'}
 warnings.filterwarnings("ignore")
 apiServer='https://portal.starleaf.com/v1'
 token = "xoxp-4281906585-16032285248-16324528194-a1f404b085"
-myUrl = "http://127.0.0.1:8000"
 
 help_text =  "This creates a new StarLeaf conference, with you as moderator\n"
 help_text+=  "Users will get a Breeze link to click and the dial-in number\n"
@@ -205,7 +204,7 @@ def make_user(id):
     user.save()
     return user
 
-def StarLeafSlack(data):
+def StarLeafSlack(data, myUrl):
     
     slack = SlackClient(token, "https://slack.com/api/")
     if not slack.authenticate():
@@ -260,7 +259,7 @@ def StarLeafSlack(data):
                                  
         if len(user.password) == 0:
     #        string =   "Use */starleaf pw=pass* where pass is your Breeze password"
-            string =  " click  "+myUrl+"/page?user_id="+user_id+"&email="+email+">|here> to set password.....\n"
+            string =  " click  <"+myUrl+"/page?user_id="+user_id+"&email="+email+"|here> to set password.....\n"
             return string
                                  
         if user.error != "":
@@ -391,8 +390,6 @@ def slackpw(request):
 
 @csrf_exempt
 def slack(request):
-    global myUrl
-    print "SLACK ----"
     myURL = "http://"+request.META['HTTP_HOST']
     if request.method == 'POST':
         data = request.POST.copy()
@@ -400,7 +397,7 @@ def slack(request):
         data = request.GET.copy()
     else:
         HttpResponse("Failure")
-    r = StarLeafSlack(data)
+    r = StarLeafSlack(data, myUrl)
     return HttpResponse(r)
 
 
