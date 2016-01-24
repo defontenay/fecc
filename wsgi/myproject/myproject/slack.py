@@ -19,8 +19,7 @@ from users.models import User
 from django.http import HttpResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
 
-
-
+lastlog = datetime.now()
 headers = {'Content-type': 'application/json'}
 warnings.filterwarnings("ignore")
 apiServer='https://portal.starleaf.com/v1'
@@ -71,7 +70,6 @@ Enter StarLeaf Password : <br> <input type="password" name="password" size="25">
 def page(data):
     if data.method != 'GET':
         return HttpResponse('INVALID_METHOD')
-
     try:
         id = data.GET.get('user_id',"slackid")
         email = data.GET.get('email',"email")
@@ -83,9 +81,15 @@ def page(data):
 
 ###############################################################################
 
+
+
 def log(logdata,header=""):
+    global lastlog
     log = open(LOGFILE, 'a')
-    log.write(str(datetime.now())+"--------------------\n")
+    datetime.now() - lastlog
+    if (datetime.now() - lastlog) > timedelta(seconds=2):
+        lastlog = datetime.now()
+        log.write(str(datetime.now())+"--------------------\n")
     if len(header) > 0:
         log.write(header+"\n")
     if "static" in LOGFILE:
@@ -101,20 +105,11 @@ def log(logdata,header=""):
 
 
 def json_log(logdata,header=""):
-    log = open(LOGFILE, 'a')
-    log.write(str(datetime.now())+"--------------------\n")
-    if len(header) > 0:
-        log.write(header+"\n")
     try:
         string = json.dumps(logdata, sort_keys=True, indent=4, separators=(',', ': '))
     except:
         string = "No JSON"
-    log.write(string)
-    if "static" in LOGFILE:
-        print header
-        print string
-    log.write("\n")
-    log.close()
+    log(logdata,string)
     return 0
 
 
@@ -213,7 +208,7 @@ def StarLeafSlack(data, myUrl):
     user_id=data.get('user_id')
     text=data.get('text')
 
-    print "authenticated"
+    log( "authenticated" )
 
     if not user_id:
         return "No user id argument"
@@ -324,6 +319,7 @@ def makeConference(slack,user,data):
     starleafConference['end'] =  (datetime.utcnow() + timedelta(minutes=mins)).isoformat()
 
     ch_body = slack.getChannel(channel_id)          # grabe the channel details
+    log ("looking up")
     if not ch_body:
         members =[]
     else:
@@ -382,7 +378,10 @@ def slackpw(request):
     user.email = email
     user.save()
     print "returning"
-    return HttpResponse("StarLeaf password set")
+    return HttpResponse('StarLeaf password set<br><br><form method="post"> \
+                    <input type="button" value="Close Window"  \
+                    onclick="window.close()">  \
+                    </form>')
 
 
 ###############################################################################

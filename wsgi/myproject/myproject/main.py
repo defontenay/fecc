@@ -292,20 +292,11 @@ def log(logdata,header=""):
 
 
 def json_log(logdata,header=""):
-    log = open(LOGFILE, 'a')
-    log.write(str(datetime.datetime.now())+"--------------------\n")
-    if len(header) > 0:
-        log.write(header+"\n")
     try:
         string = json.dumps(logdata, sort_keys=True, indent=4, separators=(',', ': '))
     except:
         string = "No JSON"
-    log.write(string)
-    if "static" in LOGFILE:
-        print header
-        print string
-    log.write("\n")
-    log.close()
+    log(logdata,string)
     return 0
 
 
