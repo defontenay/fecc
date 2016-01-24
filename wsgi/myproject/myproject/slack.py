@@ -390,7 +390,7 @@ def slackpw(request):
 
 @csrf_exempt
 def slack(request):
-    myURL = "http://"+request.META['HTTP_HOST']
+    myUrl = "http://"+request.META['HTTP_HOST']
     if request.method == 'POST':
         data = request.POST.copy()
     elif request.method == 'GET':
