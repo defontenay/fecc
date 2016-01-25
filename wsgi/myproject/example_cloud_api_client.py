@@ -127,8 +127,7 @@ email = { \
 }
 
 form = { "password":"wombat","user_id":"U0G0Y8D7A", "email":"will@fred.com"}
-                             
-                             
+
 headers = {'Content-type': 'application/json'}
 headers = {'Content-type': 'multipart/form-data'}
 
@@ -145,6 +144,7 @@ if c == 500:
     exit()
 else:
     print 'Body text is:\n', t
+exit()
 
 #f = open("/users/will/new.ics",'rb')
 #files = {'attachment1':f}

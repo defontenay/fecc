@@ -104,12 +104,12 @@ def log(logdata,header=""):
 
 
 
-def json_log(logdata,header=""):
+def json_log(logdata,header=" "):
     try:
         string = json.dumps(logdata, sort_keys=True, indent=4, separators=(',', ': '))
     except:
         string = "No JSON"
-    log(logdata,string)
+    log(string,header)
     return 0
 
 
@@ -232,6 +232,7 @@ def StarLeafSlack(data, myUrl):
         if user and "delete" in text:
             user.delete()
             return "Deleted"
+        
         if not user or len(user.password) is 0:
             email = body['user']['profile']['email']
             if user:
@@ -240,23 +241,26 @@ def StarLeafSlack(data, myUrl):
                 user = make_user(user_id)
                 user.email = email
                 log ( email, " no previous entry set for ")
-            m1 = re.search(r'pw=(\S+)', text)
-            m2 = re.search(r'em=([a-zA-Z0-9-.+_]{1,64}@[a-zA-Z0-9-.]{3,62})', text)
-            if m1:
-                user.password = m1.group(1)
-                log( "found a password ",user.password )
-                result += "Your pasword has been saved\n"
-            if m2:
-                user.email= m2.group(1)
-                log ( "found an email ",user.email )
-                result += "Your alternative email has been saved\n"
+            
+            #   m1 = re.search(r'pw=(\S+)', text)
+            #   m2 = re.search(r'em=([a-zA-Z0-9-.+_]{1,64}@[a-zA-Z0-9-.]{3,62})', text)
+            # if m1:
+            #    user.password = m1.group(1)
+            #    log( "found a password ",user.password )
+            #    result += "Your pasword has been saved\n"
+            #  if m2:
+            #    user.email= m2.group(1)
+            #    log ( "found an email ",user.email )
+            #    result += "Your alternative email has been saved\n"
+            
             user.save()
                                  
         if len(user.password) == 0:
-    #        string =   "Use */starleaf pw=pass* where pass is your Breeze password"
-            string =  " click  <"+myUrl+"/page?user_id="+user_id+"&email="+email+"|here> to set password.....\n"
-            return string
-                                 
+            #     string =   "Use */starleaf pw=pass* where pass is your Breeze password"
+            result  =  " click  <"+myUrl+"/page?user_id="+user_id+"&email="+email+"|here> to set password.....\n"
+        else:
+            result += "scheduling your conference now"
+                
         if user.error != "":
             result += "Your previous error was\n"
             result += user.error
@@ -264,7 +268,7 @@ def StarLeafSlack(data, myUrl):
             user.save()
 
         result += "scheduling your conference now"
-        thread1 = threading.Thread(target=makeConference, args = (slack,user,data))
+        thread1 = threading.Thread(target=makeConference, args = (slack,user,data,myUrl))
         thread1.start()
     else:
         result += "Weird error"
@@ -272,7 +276,7 @@ def StarLeafSlack(data, myUrl):
     return result
 
 
-def makeConference(slack,user,data):
+def makeConference(slack,user,data,myUrl):
                                
     starleafConference = {'title': 'conf',
     'description': 'This conference was created from Slack.',
@@ -287,10 +291,29 @@ def makeConference(slack,user,data):
     dom=data.get("team_domain")
     chan=data.get("channel_name")
     text=data.get('text')
-    log("user "+ user.slack+ " em  "+user.email+"  pw  "+user.password+" ch "+channel_id+" dom "+dom+" chn "+chan,"NEW SPAWN " )
+    url = data.get("response_url")
+    
+    start = datetime.now()
+    log("new stask spawned","NOW")
+    log(user.password,"PW")
+    log(str(len(user.password)),"PW LEN")
+    
+    while (len(user.password) < 2 ) and ( (datetime.now() - start) < timedelta(minutes = 2) ):
+        time.sleep(5)
+        log("retrying","NOW")
+        user.refresh_from_db()
+    
+    if user.password == "":
+        log("password not set "+user.email,"Process KILL" )
+        return
+
+    log("user "+ user.slack+ " em  "+user.email+"  pw  "+user.password+" ch "+channel_id+" dom "+dom+" chn "+chan,"NOW proceed " )
     
     star = StarLeafClient(username=user.email,password=user.password,apiServer=apiServer)
     if not star.authenticate():
+        session = requests.Session()
+        parms = json.dumps( {"text": "Failed to Authenticate to StarLeaf\nclick  <"+myUrl+"/page?user_id="+user.slack+"&email="+user.email+"|here> to correct..\n"} )
+        r = session.post(url,headers=headers,data=parms)
         user.error = " Failed to autheticate"
         log( "KILL -SL faled to authentivate")
         user.save()
@@ -342,7 +365,7 @@ def makeConference(slack,user,data):
         user.save()
         return
     
-    url = data.get("response_url")
+
     uri = join.replace("<uri>",dial['dial_standards'])
     conf = uri.replace("<conf-id>",dial['access_code_pstn'])
     last = conf.replace("<url>",dial['dial_info_url'])
@@ -364,7 +387,7 @@ def makeConference(slack,user,data):
 
 @csrf_exempt
 def slackpw(request):
-    print "PW request"
+    log ( "PW request", "NEW REQ")
     if request.method != 'POST':
         return HttpResponse("not accepted")
     data = request.POST.copy()
@@ -377,7 +400,6 @@ def slackpw(request):
     user.password = pw
     user.email = email
     user.save()
-    print "returning"
     return HttpResponse('StarLeaf password set<br><br><form method="post"> \
                     <input type="button" value="Close Window"  \
                     onclick="window.close()">  \
