@@ -305,7 +305,9 @@ def makeConference(slack,user,data,myUrl):
     star = StarLeafClient(username=user.email,password=user.password,apiServer=apiServer)
     if not star.authenticate():
         session = requests.Session()
-        parms = json.dumps( {"text": "Failed to Authenticate to StarLeaf\nclick  <"+myUrl+"/page?user_id="+user.slack+"&email="+user.email+"|here> to correct..\n"} )
+        parms = json.dumps( {"text": "Failed to Authenticate to StarLeaf\n\
+                           click  <"+myUrl+"/page?user_id="+user.slack+"&email="+user.email+"|here> to correct..\n \
+                           then re-issue /starleaf command\n"} )
         r = session.post(url,headers=headers,data=parms)
         log( "KILL -SL faled to authentivate")
         user.save()
