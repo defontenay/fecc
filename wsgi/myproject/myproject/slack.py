@@ -259,19 +259,12 @@ def StarLeafSlack(data, myUrl):
             #     string =   "Use */starleaf pw=pass* where pass is your Breeze password"
             result  =  " click  <"+myUrl+"/page?user_id="+user_id+"&email="+email+"|here> to set password.....\n"
         else:
-            result += "scheduling your conference now"
-                
-        if user.error != "":
-            result += "Your previous error was\n"
-            result += user.error
-            user.error = ""
-            user.save()
+            result = "scheduling your conference now\n"
 
-        result += "scheduling your conference now"
         thread1 = threading.Thread(target=makeConference, args = (slack,user,data,myUrl))
         thread1.start()
     else:
-        result += "Weird error"
+        result = "Weird error"
 
     return result
 
@@ -314,7 +307,6 @@ def makeConference(slack,user,data,myUrl):
         session = requests.Session()
         parms = json.dumps( {"text": "Failed to Authenticate to StarLeaf\nclick  <"+myUrl+"/page?user_id="+user.slack+"&email="+user.email+"|here> to correct..\n"} )
         r = session.post(url,headers=headers,data=parms)
-        user.error = " Failed to autheticate"
         log( "KILL -SL faled to authentivate")
         user.save()
         return
@@ -360,7 +352,6 @@ def makeConference(slack,user,data,myUrl):
     try:
         dial = conf['dial_info']
     except:
-        user.error = "KILL Failed to create conf"
         log("KILL failed to create SL conf")
         user.save()
         return
@@ -376,7 +367,6 @@ def makeConference(slack,user,data,myUrl):
     r = session.post(url,headers=headers,data=parms)
 
     if r.status_code != 200:
-        user.error = "POST error "+str(r.status_code)
         user.save()
     log ( str(r.status_code)," KILL success")
     return
