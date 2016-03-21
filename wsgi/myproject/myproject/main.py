@@ -218,6 +218,7 @@ def email(request):
             user = match.group(2)
             conf = match.group(3)
             uri = conf+"+"+user+"+"+dom+"@cloud.sl"
+            subj = data.get('subject')
             if conf:
                 participants = []
                 ems = re.findall(r'([a-zA-Z0-9-.+_]{1,64}@[a-zA-Z0-9-.]{3,62})', to)
@@ -228,7 +229,7 @@ def email(request):
                     participants.append( {'email':em} )
                 
                 settings = {
-                    'title':data.get('subject'),
+                    'title' : subj,
                     'permanent': False,
                     'participants': participants,
                     'timezone': 'UTC' ,
@@ -242,9 +243,10 @@ def email(request):
                     
                 star = StarLeafClient(username=username,password=password,apiServer=apiServer)
                 star.authenticate()
-                star.deleteGreenButton("Skype")
-                star.createGreenButton(settings,"Skype")
-            
+                if "Canceled" in subj:
+                    star.deleteGreenButton(conf)
+                else:
+                    star.createGreenButton(settings,conf)
             
             return HttpResponse("no ICS")
 

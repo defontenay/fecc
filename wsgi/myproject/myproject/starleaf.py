@@ -55,13 +55,13 @@ class StarLeafClient(object):
     
     @staticmethod
     def _getBody(response):
-        #       print ('SL Response code is:' + str(response.status_code))
+        print ('SL Response code is:' + str(response.status_code))
         try:
             body = response.json()
         except ValueError:
             return None
         else:
-            #     json_log (body)
+            print json.dumps(body, sort_keys=True, indent=4, separators=(',', ': ')
             return body
 
     def _apiAuthentication(self, salt_hex, iterations, challenge_hex):
@@ -96,7 +96,6 @@ class StarLeafClient(object):
             postBody = {'settings': settings}
             url = self.apiServer + "/myconferences/" + confId
             print ("url is  "+url)
-            #     json_log(settings)
             try:
                 r = self.session.put(url, data=json.dumps(postBody), headers=headers, verify=self.sslVerify)
                 self._getBody(r)
