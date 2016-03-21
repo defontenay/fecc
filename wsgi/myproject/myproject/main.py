@@ -15,7 +15,7 @@ from settings import LOGFILE, STATIC_ROOT
 from starleaf import StarLeafClient
 
 apiServer='https://portal.starleaf.com/v1'
-username="wmm+185@starleaf.com"
+username="william.macdonald@starleaf.com"
 password="wombat"
 
 
@@ -175,36 +175,35 @@ def getTimezone(timezone):
 @csrf_exempt
 def email(request):
     
-    log ("New email received")
+    log ("New email received","NEW")
                       
     if request.method != 'POST':
         return HttpResponse('Invalid method')
             
     try:
-        log(request.body,"RAW")
         data = request.POST.copy()
-        att = data.get('attachments',0)
+        att = data.get('attachments',"0")
         env  = json.loads(data['envelope'])
         sub = data.get('subject',"*****")
-        to = data.get('to',"")
+        to = data.get('to'," ")
+        to = to.replace("cloud.sl","call.sl)")
         cc = data.get('cc',"")
-        log (to,"TO ")
-        log (cc,"CC ")
+        cc = cc.replace("cloud.sl","call.sl)")
+        body = data.get('text'," ")
         ics = None
         att = int(att)
-        if request.FILES:
-            for f in request.FILES:
-                log (f, "FILE")
-        json_log(env,"ENVELOPE")
         if att == 0:
             log ("","BODY (no attachments)")
         else:
+            if request.FILES:
+                for f in request.FILES:
+                    log (f, "FILE")
+            json_log(env,"ENVELOPE")
             info = json.loads(data.get('attachment-info'))
             json_log(info,"ATTCHMENTS") 
             for x in range(1,att+1):
-                log (str(x))
                 name = "attachment"+str(x)
-                log (name)
+                log (name,"ATT")
                 file = info[name]
                 json_log(file,"FILE")
                 if 'filename' in file and ".ics" in file['filename']:
@@ -214,9 +213,42 @@ def email(request):
 
 
         if not ics:
+            match = re.search('<https://([a-z0-9.\-]+)/[[a-z0-9]*/]*([a-z0-9.]*)/([A-Z0-9]*)>', body)
+            dom  = match.group(1)
+            user = match.group(2)
+            conf = match.group(3)
+            uri = conf+"+"+user+"+"+dom+"@cloud.sl"
+            if conf:
+                participants = []
+                ems = re.findall(r'([a-zA-Z0-9-.+_]{1,64}@[a-zA-Z0-9-.]{3,62})', to)
+                for em in ems:
+                    participants.append( {'email':em} )
+                ems = re.findall(r'([a-zA-Z0-9-.+_]{1,64}@[a-zA-Z0-9-.]{3,62})', cc)
+                for em in ems:
+                    participants.append( {'email':em} )
+                
+                settings = {
+                    'title':data.get('subject'),
+                    'permanent': False,
+                    'participants': participants,
+                    'timezone': 'UTC' ,
+                    'start': pytz.utc.localize(datetime.datetime.utcnow()).isoformat(),
+                    'end': (pytz.utc.localize(datetime.datetime.utcnow())+datetime.timedelta(hours=1)).isoformat(),
+                    'uri': uri,
+                    }
+                
+                json_log(settings,"SL-SETTINGS")
+                log ("preparing to call","-----")
+                    
+                star = StarLeafClient(username=username,password=password,apiServer=apiServer)
+                star.authenticate()
+                star.deleteGreenButton("Skype")
+                star.createGreenButton(settings,"Skype")
+            
+            
             return HttpResponse("no ICS")
 
-        log ("found an ICS .... "+file['name']+" size "+str(len(ics)))
+        log ("found an ICS .... "+file['name']+" size "+str(len(ics)),"")
 
         cal = Calendar.from_ical(ics)
         method = cal['METHOD'] #       if method not in ['REQUEST', 'CANCEL']:
@@ -225,7 +257,7 @@ def email(request):
             if event.name == "VEVENT":
                 uid = event.get('UID')
                 log ( uid, "UID" )
-                
+
                 uri = None
                 if method == 'REQUEST':
                     if "bluejeans" in env["from"]:
@@ -275,7 +307,7 @@ def email(request):
 
 
 
-def log(logdata,header=""):
+def log(logdata,header):
     log = open(LOGFILE, 'a')
     log.write(str(datetime.datetime.now())+"--------------------\n")
     log.write (header)
@@ -291,12 +323,12 @@ def log(logdata,header=""):
     
 
 
-def json_log(logdata,header=""):
+def json_log(logdata,header):
     try:
         string = json.dumps(logdata, sort_keys=True, indent=4, separators=(',', ': '))
     except:
         string = "No JSON"
-    log(logdata,string)
+    log(string,header)
     return 0
 
 

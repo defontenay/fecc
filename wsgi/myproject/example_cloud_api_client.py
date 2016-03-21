@@ -116,15 +116,24 @@ files = { \
 }
 
 
-email = { \
+email0 = { \
 "headers":'this is headers',
 "to":'new@cloud.sl, William MacDonald <william.macdonald@gmail.com>, William MacDonald <william.macdonald@starleaf.com>',
 "cc":"fred@fred",
 "subject":'thi is subuj',
 "envelope":json.dumps({"to":'fred@fred.com',"from":'john@webex.com'}),
-"attachments":1,
+"attachments":'1',
 "attachment-info":json.dumps(files)
 }
+
+email = { \
+"headers":'this is headers',
+"to":'new@cloud.sl, William MacDonald <william.macdonald@gmail.com>, William MacDonald <william.macdonald@starleaf.com>',
+"cc":"fred@fred",
+"subject":'thi is subuj',
+"text":'Skype Meeting<https://meet.lync.com/starleaf1/william.macdonald/03ZIU1XF>',
+"envelope":json.dumps({"to":'fred@fred.com',"from":'john@webex.com'}),
+"attachments":'0'}
 
 form = { "password":"wombat","user_id":"U0G0Y8D7A", "email":"will@fred.com"}
 
@@ -133,24 +142,24 @@ headers = {'Content-type': 'multipart/form-data'}
 
 session = requests.Session()
 print "calling..."
-url='http://127.0.0.1:8000/slack/'
-r = session.get(url,params=web)
-c=r.status_code
-t=r.text
-print 'Response code is:', c
-if c == 500:
-    i = t.find('<div id="summary">')
-    print t[i:i+300]
-    exit()
-else:
-    print 'Body text is:\n', t
-exit()
+#url='http://127.0.0.1:8000/slack/'
+#r = session.get(url,params=web)
+#c=r.status_code
+#t=r.text
+#print 'Response code is:', c
+#if c == 500:
+#    i = t.find('<div id="summary">')
+#    print t[i:i+300]
+#    exit()
+#else:
+#    print 'Body text is:\n', t
+#exit()
 
-#f = open("/users/will/new.ics",'rb')
-#files = {'attachment1':f}
-url='http://127.0.0.1:8000/slackpw/'
-#r = session.post(url,data=email,files=files, verify=False)
-r = session.post(url,data=form)
+f = open("/users/will/new.ics",'rb')
+files = {'attachment1':f}
+url='http://127.0.0.1:8000/email/'
+r = session.post(url,data=email,files=files, verify=False)
+#r = session.post(url,data=form)
 c=r.status_code
 t=r.text
 print 'Response code is:', c
