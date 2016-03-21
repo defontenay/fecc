@@ -61,7 +61,7 @@ class StarLeafClient(object):
         except ValueError:
             return None
         else:
-            print json.dumps(body, sort_keys=True, indent=4, separators=(',', ': ')
+            print json.dumps(body, sort_keys=True, indent=4, separators=(',', ': '))
             return body
 
     def _apiAuthentication(self, salt_hex, iterations, challenge_hex):
