@@ -186,8 +186,12 @@ def email(request):
         env  = json.loads(data['envelope'])
         sub = data.get('subject',"*****")
         to = data.get('to'," ")
+        fro = data.get('from'," ")
+        log (to,"TO:")
+        log (fro,"FROM:")
         to = to.replace("cloud.sl","call.sl)")
         cc = data.get('cc',"")
+        log (cc,"CC:")
         cc = cc.replace("cloud.sl","call.sl)")
         body = data.get('text'," ")
         ics = None
@@ -211,7 +215,6 @@ def email(request):
                     ics = ics_file.read()
                     break;
 
-
         if not ics:
             match = re.search('<https://([a-z0-9.\-]+)/[[a-z0-9]*/]*([a-z0-9.]*)/([A-Z0-9]*)>', body)
             if not match:
@@ -221,17 +224,23 @@ def email(request):
             dom  = match.group(1)
             user = match.group(2)
             conf = match.group(3)
+            
+            match = re.search('([a-zA-Z0-9-.+_]{4,64})@([a-zA-Z0-9-.]{0,62}?)', fro)
+            if not match:
+                log ("No from address","RETURN")
+                return HttpResponse("no ICS")
+            else:
+                dom  = match.group(2)
+
             uri = conf+"+"+user+"+"+dom+"@cloud.sl"
             subj = data.get('subject')
+            log(subj,"SUBJECT")
             if conf:
                 participants = []
                 ems = re.findall(r'([a-zA-Z0-9-.+_]{1,64}@[a-zA-Z0-9-.]{3,62})', to)
                 for em in ems:
                     participants.append( {'email':em} )
-                ems = re.findall(r'([a-zA-Z0-9-.+_]{1,64}@[a-zA-Z0-9-.]{3,62})', cc)
-                for em in ems:
-                    participants.append( {'email':em} )
-                
+            
                 now = pytz.utc.localize(datetime.datetime.utcnow())
                 later = now + datetime.timedelta(hours=1)
                 
