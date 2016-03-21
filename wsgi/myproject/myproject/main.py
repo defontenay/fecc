@@ -243,11 +243,12 @@ def email(request):
                     
                 star = StarLeafClient(username=username,password=password,apiServer=apiServer)
                 star.authenticate()
+                log ("autrnticated","-----")
                 if "Canceled" in subj:
                     star.deleteGreenButton(conf)
                 else:
                     star.createGreenButton(settings,conf)
-            
+                log)"all done","-----")
             return HttpResponse("no ICS")
 
         log ("found an ICS .... "+file['name']+" size "+str(len(ics)),"")
