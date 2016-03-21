@@ -214,6 +214,10 @@ def email(request):
 
         if not ics:
             match = re.search('<https://([a-z0-9.\-]+)/[[a-z0-9]*/]*([a-z0-9.]*)/([A-Z0-9]*)>', body)
+            if not match:
+                log ("Not a Lync invite","RETURN")
+                return HttpResponse("no ICS")
+            
             dom  = match.group(1)
             user = match.group(2)
             conf = match.group(3)
@@ -228,13 +232,16 @@ def email(request):
                 for em in ems:
                     participants.append( {'email':em} )
                 
+                now = pytz.utc.localize(datetime.datetime.utcnow())
+                later = now + datetime.timedelta(hours=1)
+                
                 settings = {
                     'title' : subj,
                     'permanent': False,
                     'participants': participants,
                     'timezone': 'UTC' ,
-                    'start': pytz.utc.localize(datetime.datetime.utcnow()).isoformat(),
-                    'end': (pytz.utc.localize(datetime.datetime.utcnow())+datetime.timedelta(hours=1)).isoformat(),
+                    'start': now.replace(tzinfo=None).isoformat(),
+                    'end': later.replace(tzinfo=None).isoformat(),
                     'uri': uri,
                     }
                 

@@ -157,7 +157,7 @@ print "calling..."
 
 f = open("/users/will/new.ics",'rb')
 files = {'attachment1':f}
-url='http://fecc.starleaf.com/email/'
+url='http://127.0.0.1:8000/email/'
 r = session.post(url,data=email,files=files, verify=False)
 #r = session.post(url,data=form)
 c=r.status_code
