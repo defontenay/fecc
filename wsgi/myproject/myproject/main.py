@@ -248,7 +248,7 @@ def email(request):
                     star.deleteGreenButton(conf)
                 else:
                     star.createGreenButton(settings,conf)
-                log)"all done","-----")
+                log("all done","-----")
             return HttpResponse("no ICS")
 
         log ("found an ICS .... "+file['name']+" size "+str(len(ics)),"")
