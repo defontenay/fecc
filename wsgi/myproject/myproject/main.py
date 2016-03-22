@@ -225,11 +225,11 @@ def email(request):
             user = match.group(2)
             conf = match.group(3)
             
-            match = re.search('([a-zA-Z0-9-.+_]{4,64})@([a-zA-Z0-9-.]{0,62}?)', fro)
+            match = re.search('([a-zA-Z0-9-.+_]{4,64})@([a-zA-Z0-9-.]{0,62})', fro)
             if not match:
                 log ("No from address","RETURN")
                 return HttpResponse("no ICS")
-            else:
+            else:                
                 dom  = match.group(2)
 
             uri = conf+"+"+user+"+"+dom+"@cloud.sl"
@@ -239,7 +239,9 @@ def email(request):
                 participants = []
                 ems = re.findall(r'([a-zA-Z0-9-.+_]{1,64}@[a-zA-Z0-9-.]{3,62})', to)
                 for em in ems:
-                    participants.append( {'email':em} )
+                    newu = {'email':em}
+                    if not newu in participants:
+                        participants.append ( newu )
             
                 now = pytz.utc.localize(datetime.datetime.utcnow())
                 later = now + datetime.timedelta(hours=1)

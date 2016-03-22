@@ -129,7 +129,7 @@ email0 = { \
 
 email = { \
 "headers":'this is headers',
-"to":'new@cloud.sl, William MacDonald <william.macdonald@gmail.com>, William MacDonald <william.macdonald@starleaf.com>',
+"to":'new@cloud.sl, new@cloud.sl, William MacDonald <william.macdonald@gmail.com>, William MacDonald <william.macdonald@starleaf.com>',
 "cc":"fred@fred",
 "from":"fred0_123@fred.co.ik.will",
 "subject":'thi is subuj',
