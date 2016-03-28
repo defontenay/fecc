@@ -189,10 +189,10 @@ def email(request):
         fro = data.get('from'," ")
         log (to,"TO:")
         log (fro,"FROM:")
-        to = to.replace("cloud.sl","call.sl)")
+        to = to.replace("cloud.sl","call.sl")
         cc = data.get('cc',"")
         log (cc,"CC:")
-        cc = cc.replace("cloud.sl","call.sl)")
+        cc = cc.replace("cloud.sl","call.sl")
         body = data.get('text'," ")
         ics = None
         att = int(att)
@@ -293,10 +293,12 @@ def email(request):
                     participants = []
                     ems = re.findall(r'([a-zA-Z0-9-.+_]{1,64}@[a-zA-Z0-9-.]{3,62})', to)
                     for em in ems:
-                        participants.append( {'email':em} )
+                        em2 = em.replace("cloud.sl","call.sl")
+                        participants.append( {'email':em2} )
                     ems = re.findall(r'([a-zA-Z0-9-.+_]{1,64}@[a-zA-Z0-9-.]{3,62})', cc)
                     for em in ems:
-                        participants.append( {'email':em} )
+                        em2 = em.replace("cloud.sl","call.sl")
+                        participants.append( {'email':em2} )
 
                     settings = {
                         'title':event.get('SUMMARY'),
