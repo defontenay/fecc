@@ -27,7 +27,7 @@ page = '<!DOCTYPE html> \
 \
 <tr>\
 <td> </td> \
-<td> <form method="get" action="/up"> <button type="submit">UP</button></form> </td>  \
+<td> <form method="get" action="/up"> <button type="submit">. UP  ..</button></form> </td>  \
 <td> </td> \
 </tr> \
 \
@@ -55,6 +55,16 @@ page = '<!DOCTYPE html> \
 <td> <form method="get" action="/out"> <button type="submit">OUT</button></form> </td> \
 </tr> \
 \
+<tr>\
+<td> </td> \
+<td> ......... </td>  \
+<td> </td> \
+</tr> \
+<tr> \
+<td> <form method="get" action="/hu"> <button type="submit">HU</button></form> </td> \
+<td> <form method="get" action="/dial"> <button type="submit">DIAL</button></form> </td> \
+<td> <form method="get" action="/uri"> <input type="text" name="uri" /></form> </td> \
+</tr> \
 \
 \
 </table>\
@@ -65,7 +75,6 @@ set_var = "."
 
 
 ###############################################################################
-
 ###############################################################################
 def serve_poll(request):
     global set_var
@@ -106,6 +115,27 @@ def out(request):
 
 def pc(request):
     perform ("PC")
+    return HttpResponse(page)
+
+def dial(request):
+    perform ("DIAL")
+    return HttpResponse(page)
+
+def hu(request):
+    perform ("HU")
+    return HttpResponse(page)
+
+def uri(request):
+    global set_var
+    if request.method != 'GET':
+            return HttpResponse(page)
+    data = request.GET.copy()
+    try:
+        dest = data['uri']
+    except:
+        return HttpResponse(page)
+    if "@" in dest:
+        set_var = dest
     return HttpResponse(page)
 
 def serve_blank(request):
