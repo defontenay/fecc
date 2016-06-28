@@ -420,8 +420,9 @@ def slack(request):
 
 @csrf_exempt
 def nexmo(request):
-    return HttpResponse('<transfer name="result" dest="sip:5022@starleaf.call.sl" bridge="true">)
-    log ( "Nexmo request", "NEW REQ")
+    data = request.GET.copy()
+    return HttpResponse('<?xml version="1.0" encoding="UTF-8"?><vxml version = "2.1"> <transfer name="result" dest="sip:5022@starleaf.call.sl" bridge="true">')
+    log ( "Nexmo request", "NE")
     if request.method != 'POST':
         return HttpResponse("not accepted")
     data = request.POST.copy()
