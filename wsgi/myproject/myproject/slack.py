@@ -420,25 +420,9 @@ def slack(request):
 
 @csrf_exempt
 def nexmo(request):
-    data = request.GET.copy()
+    print "Made it to my routine"
     return HttpResponse('<?xml version="1.0" encoding="UTF-8"?><vxml version = "2.1"> <transfer name="result" dest="sip:5022@starleaf.call.sl" bridge="true">')
-    log ( "Nexmo request", "NE")
-    if request.method != 'POST':
-        return HttpResponse("not accepted")
-    data = request.POST.copy()
-    email=data.get('email',"myemail")
-    user_id=data.get('user_id',"nousr")
-    pw =data.get('password',"wombat")
-    user = look_up_user(user_id)
-    if not user:
-        user = make_user(user_id)
-    user.password = pw
-    user.email = email
-    user.save()
-    return HttpResponse('StarLeaf password set<br><br><form method="post"> \
-                        <input type="button" value="Close Window"  \
-                        onclick="window.close()">  \
-                        </form>')
+
 
 
 
