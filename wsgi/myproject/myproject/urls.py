@@ -31,6 +31,7 @@ urlpatterns = [
                url(r'^dial', main.dial),
                url(r'^hu', main.hu),
                url(r'^email', main.email),
+               url(r'^nexmo', slack.nexmo),  #nothing to do with slack really
                url(r'^slackpw', slack.slackpw),
                url(r'^slack', slack.slack),
                url(r'^page', slack.page),
