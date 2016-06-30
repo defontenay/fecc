@@ -418,7 +418,7 @@ def slack(request):
 ###############################################################################
 
 blank='<transfer name="result" dest="$$$" bridge="true">  \
-    <prompt>Please wait while we transfer you.</prompt>   \
+    <prompt>Please wait .</prompt>   \
     <grammar xml:lang="en-US" root = "TOPLEVEL" mode="voice">  \
         <rule id="TOPLEVEL" scope="public">    \
             <one-of>   \
@@ -435,9 +435,10 @@ def nexmo(request):
     if request.method != 'GET':
         return json_400_response(status='INVALID_METHOD')
     data = request.GET.copy()
+    print data
 
     try:
-        dest = data['dest']
+        dest = data.get('dest'," fred")
         print "destination is ",dest
         resp = blank.replace('$$$',dest)
     except:
