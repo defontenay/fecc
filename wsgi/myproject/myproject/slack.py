@@ -421,7 +421,21 @@ def slack(request):
 @csrf_exempt
 def nexmo(request):
     print "Made it to my routine"
-    return HttpResponse('<?xml version="1.0" encoding="UTF-8"?><vxml version = "2.1"> <transfer name="result" dest="sip:5022@starleaf.call.sl" bridge="true">')
+    
+    if request.method != 'GET':
+        return json_400_response(status='INVALID_METHOD')
+    data = request.GET.copy()
+
+    try:
+        dest = data['dest']
+    except:
+        return HttpResponse('<?xml version="1.0" encoding="UTF-8"?><vxml version = "2.1">   </vmxl>')
+
+
+
+    #    return HttpResponse('<?xml version="1.0" encoding="UTF-8"?><vxml version = "2.1"> <transfer name="result" dest="sip:5022@starleaf.call.sl" bridge="true">')
+    return HttpResponse('<?xml version="1.0" encoding="UTF-8"?><vxml version = "2.1"> <transfer dest='+dest+'>,</vmxl>')
+
 
 
 
