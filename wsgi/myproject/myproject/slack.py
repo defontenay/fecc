@@ -417,6 +417,16 @@ def slack(request):
 
 ###############################################################################
 
+blank='<transfer name="result" dest="$$$" bridge="true">  \
+    <prompt>Please wait while we transfer you.</prompt>   \
+    <grammar xml:lang="en-US" root = "TOPLEVEL" mode="voice">  \
+        <rule id="TOPLEVEL" scope="public">    \
+            <one-of>   \
+                <item> disconnect </item>   \
+            </one-of>   \
+        </rule>   \
+    </grammar>   \
+</transfer>  '
 
 @csrf_exempt
 def nexmo(request):
@@ -428,13 +438,15 @@ def nexmo(request):
 
     try:
         dest = data['dest']
+        print "destination is ",dest
+        resp = blank.replace('$$$',dest)
     except:
-        return HttpResponse('<?xml version="1.0" encoding="UTF-8"?><vxml version = "2.1">   </vmxl>')
+        return HttpResponse('didnt get a dest in the command')
 
 
 
     #    return HttpResponse('<?xml version="1.0" encoding="UTF-8"?><vxml version = "2.1"> <transfer name="result" dest="sip:5022@starleaf.call.sl" bridge="true">')
-    return HttpResponse('<?xml version="1.0" encoding="UTF-8"?><vxml version = "2.1"> <transfer dest='+dest+'>,</vmxl>')
+    return HttpResponse('<?xml version="1.0" encoding="UTF-8"?><vxml version = "2.1">'+resp+'</vmxl>')
 
 
 
