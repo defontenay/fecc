@@ -31,8 +31,10 @@ urlpatterns = [
                url(r'^dial', main.dial),
                url(r'^hu', main.hu),
                url(r'^email', main.email),
-               url(r'^nexmo/(?P<dn>[0-9]{4,10})/(?P<domain>[a-z0-9.]{3,30})', slack.nexmo ),  #nothing to do with slack really
-               url(r'^nexmo', slack.nexmo),
+               url(r'^nexmo_error', slack.nexmo_error),
+               url(r'^nexmo_status', slack.nexmo_status),
+               url(r'^nexmo/(?P<dn>[0-9]{4,10})/(?P<domain>[a-z0-9.]{3,30})', slack.nexmo_ans ),  #nothing to do with slack really
+               url(r'^nexmo', slack.nexmo_ans),
                url(r'^slackpw', slack.slackpw),
                url(r'^slack', slack.slack),
                url(r'^page', slack.page),

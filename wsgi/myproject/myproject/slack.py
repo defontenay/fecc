@@ -429,7 +429,7 @@ blank='<transfer name="result" dest="sip:$$$" bridge="true">  \
     </grammar>   \</transfer>  '
 
 @csrf_exempt
-def nexmo(request, dn="0", domain="x"):
+def nexmo_ans(request, dn="0", domain="x"):
     print "Made it to my routine "
     dest = dn+"@"+domain
     
@@ -445,11 +445,31 @@ def nexmo(request, dn="0", domain="x"):
     except:
         return HttpResponse('didnt get a dest in the command')
 
-
-
     #    return HttpResponse('<?xml version="1.0" encoding="UTF-8"?><vxml version = "2.1"> <transfer name="result" dest="sip:5022@starleaf.call.sl" bridge="true">')
     return HttpResponse('<?xml version="1.0" encoding="UTF-8"?><vxml version = "2.1">'+resp+'</vmxl>')
 
+
+@csrf_exempt
+def nexmo_error(request):
+    print "Made it to my error "
+
+    if request.method != 'GET':
+        return json_400_response(status='INVALID_METHOD')
+    data = request.GET.copy()
+    for x in data:
+        print x,"  ",data[x]
+    return HttpResponse(' error ')
+
+@csrf_exempt
+def nexmo_status(request):
+    print "Made it to my status "
+
+    if request.method != 'GET':
+        return json_400_response(status='INVALID_METHOD')
+    data = request.GET.copy()
+    for x in data:
+        print x,"  ",data[x]
+    return HttpResponse(' status ')
 
 
 
