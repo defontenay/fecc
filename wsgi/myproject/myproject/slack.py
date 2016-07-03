@@ -403,6 +403,7 @@ def slackpw(request):
 
 @csrf_exempt
 def slack(request):
+    print "slack"
     myUrl = "http://"+request.META['HTTP_HOST']
     if request.method == 'POST':
         data = request.POST.copy()
@@ -425,20 +426,20 @@ blank='<transfer name="result" dest="$$$" bridge="true">  \
                 <item> disconnect </item>   \
             </one-of>   \
         </rule>   \
-    </grammar>   \
-</transfer>  '
+    </grammar>   \</transfer>  '
 
 @csrf_exempt
-def nexmo(request):
-    print "Made it to my routine"
+def nexmo(request, dn="0", domain="x"):
+    print "Made it to my routine "
+    dest = dn+"@"+domain
     
     if request.method != 'GET':
         return json_400_response(status='INVALID_METHOD')
     data = request.GET.copy()
-    print data
+    for x in data:
+        print x,"  ",data[x]
 
     try:
-        dest = data.get('dest'," fred")
         print "destination is ",dest
         resp = blank.replace('$$$',dest)
     except:
