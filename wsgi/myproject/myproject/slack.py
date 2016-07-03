@@ -418,7 +418,7 @@ def slack(request):
 
 ###############################################################################
 
-blank='<transfer name="result" dest="$$$" bridge="true">  \
+blank='<transfer name="result" dest="sip:$$$" bridge="true">  \
     <prompt>Please wait .</prompt>   \
     <grammar xml:lang="en-US" root = "TOPLEVEL" mode="voice">  \
         <rule id="TOPLEVEL" scope="public">    \
