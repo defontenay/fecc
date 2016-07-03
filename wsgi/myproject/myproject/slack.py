@@ -418,15 +418,40 @@ def slack(request):
 
 ###############################################################################
 
-blank='<transfer name="result" dest="sip:$$$" bridge="true">  \
-    <prompt>Please wait .</prompt>   \
-    <grammar xml:lang="en-US" root = "TOPLEVEL" mode="voice">  \
-        <rule id="TOPLEVEL" scope="public">    \
-            <one-of>   \
-                <item> disconnect </item>   \
-            </one-of>   \
-        </rule>   \
-    </grammar>   \</transfer>  '
+
+
+blank = '<?xml version="1.0" encoding="UTF-8"?>    \
+<vxml version = "2.1">  \
+    <form>\
+        <transfer name="result" dest="sip:$$$" bridge="true">\
+            <prompt>Please wait while we transfer you.</prompt>\
+            <grammar xml:lang="en-US" root = "TOPLEVEL" mode="voice">\
+                <rule id="TOPLEVEL" scope="public">\
+                    <one-of>\
+                        <item> disconnect </item>\
+                    </one-of>\
+                </rule>\
+            </grammar>\
+        </transfer>\
+        <filled>\
+            <if cond="result == \'busy\'">\
+                <prompt>Sorry, they busy.</prompt>\
+                <elseif cond="result == \'noanswer\'" />\
+                <prompt>Sorry, they did not answer.</prompt>\
+                <else />\
+                <prompt>You spoke for <value expr="result$.duration" /> seconds.</prompt>\
+            </if>\
+            <if cond="result$.inputmode == \'voice\'">\
+                You ended the call by saying, <value expr="result$.utterance" />.\
+            </if>\
+</filled>\
+    <block>\
+        Thanks for using the transfer element.\
+        </block>\
+    </form>\
+</vxml>'
+
+
 
 @csrf_exempt
 def nexmo_ans(request, dn="0", domain="x"):
@@ -443,10 +468,9 @@ def nexmo_ans(request, dn="0", domain="x"):
         print "destination is ",dest
         resp = blank.replace('$$$',dest)
     except:
-        return HttpResponse('didnt get a dest in the command')
-
-    #    return HttpResponse('<?xml version="1.0" encoding="UTF-8"?><vxml version = "2.1"> <transfer name="result" dest="sip:5022@starleaf.call.sl" bridge="true">')
-    return HttpResponse('<?xml version="1.0" encoding="UTF-8"?><vxml version = "2.1">'+resp+'</vmxl>')
+        return HttpResponse('error')
+    print dest
+    return HttpResponse(resp)
 
 
 @csrf_exempt
