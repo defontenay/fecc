@@ -468,8 +468,8 @@ def slack(request):
 blank = '<?xml version="1.0" encoding="UTF-8"?>    \
 <vxml version = "2.1">  \
     <form>\
-        <transfer name="result" dest="sip:$$$" bridge="true">\
-            <prompt>Please wait while we transfer you.</prompt>\
+        <transfer name="result" dest="sip:$$$" bridge="false">\
+            <prompt>Joining conference now.</prompt>\
             <grammar xml:lang="en-US" root = "TOPLEVEL" mode="voice">\
                 <rule id="TOPLEVEL" scope="public">\
                     <one-of>\
