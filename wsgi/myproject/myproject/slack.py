@@ -487,11 +487,11 @@ blank = '<?xml version="1.0" encoding="UTF-8"?>    \
                 <prompt>You spoke for <value expr="result$.duration" /> seconds.</prompt>\
             </if>\
             <if cond="result$.inputmode == \'voice\'">\
-                You ended the call by saying, <value expr="result$.utterance" />.\
+                Call ended />.\
             </if>\
 </filled>\
     <block>\
-        Thanks for using the transfer element.\
+        Goodbye\
         </block>\
     </form>\
 </vxml>'
