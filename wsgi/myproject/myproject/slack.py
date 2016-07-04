@@ -12,12 +12,16 @@ import pytz
 import time
 import warnings
 import threading
+from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from datetime import datetime, timedelta
 from settings import LOGFILE, STATIC_ROOT
 from starleaf import StarLeafClient
-from users.models import User
+from users.models import User, Global
 from django.http import HttpResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
+
+
+
 
 lastlog = datetime.now()
 headers = {'Content-type': 'application/json'}
@@ -78,6 +82,47 @@ def page(data):
         return HttpResponse(np2)
     except:
         return HttpResponse('Exception')
+
+###############################################################################
+
+def global_delete(gl_name):
+    all= Global.objects.all()
+    for x in all:
+        print "multiple found ",x.name," to be ",x.value
+        gl.delete()
+
+def get_global_value(gl_name):
+    try:
+        gl = Global.objects.get(name=gl_name)
+
+    except MultipleObjectsReturned:
+        global_delete(gl_name)
+
+    except ObjectDoesNotExist:
+        gl = Global (name=gl_name, value=".")
+        gl.save()
+
+    else:
+        print "get found ",gl.name," to be ",gl.value
+
+    return gl.value
+
+
+def set_global_value(gl_name, gl_value):
+    try:
+        gl = Global.objects.get(name=gl_name)
+
+    except MultipleObjectsReturned:
+        global_delete(gl_name)
+
+    except ObjectDoesNotExist:
+        gl = Global (name=gl_name, value=gl_value)
+        print "set new. ",gl.name," to be ",gl.value
+
+    gl.value = gl_value
+    gl.save()
+
+
 
 ###############################################################################
 
@@ -453,20 +498,19 @@ blank = '<?xml version="1.0" encoding="UTF-8"?>    \
 
 
 
-nexmo_call = "0"
+
 
 @csrf_exempt
 def nexmo_poll(request):
-    global nexmo_call
-    return HttpResponse(nexmo_call)
+    return HttpResponse(get_global_value("nexmo_call"))
 
 @csrf_exempt
 def nexmo_ans(request, dn="0", domain="x"):
-    global nexmo_call
     print "Made it to my routine "
     dest = dn+"@"+domain
     
     if request.method != 'GET':
+        set_global_value("nexmo_call","0")
         return json_400_response(status='INVALID_METHOD')
     data = request.GET.copy()
     for x in data:
@@ -475,17 +519,17 @@ def nexmo_ans(request, dn="0", domain="x"):
     try:
         print "destination is ",dest
         resp = blank.replace('$$$',dest)
-        nexmo_call = "1"
+        set_global_value("nexmo_call","1")
     except:
+        set_global_value("nexmo_call","0")
         return HttpResponse('error')
     return HttpResponse(resp)
 
 
 @csrf_exempt
 def nexmo_error(request):
-    global nexmo_call
     print "Made it to my error "
-    nexmo_call = "0"
+    set_global_value("nexmo_call","0")
 
     if request.method != 'GET':
         return json_400_response(status='INVALID_METHOD')
@@ -498,9 +542,8 @@ def nexmo_error(request):
 
 @csrf_exempt
 def nexmo_status(request):
-    global nexmo_call
     print "Made it to my status "
-    nexmo_call = "0"
+    set_global_value("nexmo_call","0")
 
     if request.method != 'GET':
         return json_400_response(status='INVALID_METHOD')

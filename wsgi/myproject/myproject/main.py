@@ -13,6 +13,7 @@ from django.http import HttpResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
 from settings import LOGFILE, STATIC_ROOT
 from starleaf import StarLeafClient
+from slack import set_global_value, get_global_value
 
 apiServer='https://portal.starleaf.com/v1'
 username="william.macdonald@starleaf.com"
@@ -71,22 +72,22 @@ page = '<!DOCTYPE html> \
 </body>\
 </html> '
 
-set_var = "."
 
 
 ###############################################################################
+
+
+
 ###############################################################################
 def serve_poll(request):
-    global set_var
-    response = set_var
-    set_var = "."
+    response = get_global_value("set_var")
+    set_global_value("set_var",'.')
     return HttpResponse(response)
 
 ##############################################################################
 
 def perform(command):
-    global set_var
-    set_var = command
+    set_global_value("set_var",command)
     return
 
 def left(request):
@@ -126,7 +127,6 @@ def hu(request):
     return HttpResponse(page)
 
 def uri(request):
-    global set_var
     if request.method != 'GET':
             return HttpResponse(page)
     data = request.GET.copy()
@@ -135,7 +135,7 @@ def uri(request):
     except:
         return HttpResponse(page)
     if "@" in dest:
-        set_var = dest
+        perform( dest )
     return HttpResponse(page)
 
 def serve_blank(request):
