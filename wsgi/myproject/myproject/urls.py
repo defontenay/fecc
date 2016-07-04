@@ -33,6 +33,7 @@ urlpatterns = [
                url(r'^email', main.email),
                url(r'^nexmo_error', slack.nexmo_error),
                url(r'^nexmo_status', slack.nexmo_status),
+               url(r'^nexmo_poll', slack.nexmo_poll),
                url(r'^nexmo/(?P<dn>[0-9]{4,10})/(?P<domain>[a-z0-9.]{3,30})', slack.nexmo_ans ),  #nothing to do with slack really
                url(r'^nexmo', slack.nexmo_ans),
                url(r'^slackpw', slack.slackpw),

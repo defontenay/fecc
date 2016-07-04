@@ -453,8 +453,16 @@ blank = '<?xml version="1.0" encoding="UTF-8"?>    \
 
 
 
+nexmo_call = "0"
+
+@csrf_exempt
+def nexmo_poll(request):
+    global nexmo_call
+    return HttpResponse(nexmo_call)
+
 @csrf_exempt
 def nexmo_ans(request, dn="0", domain="x"):
+    global nexmo_call
     print "Made it to my routine "
     dest = dn+"@"+domain
     
@@ -467,15 +475,17 @@ def nexmo_ans(request, dn="0", domain="x"):
     try:
         print "destination is ",dest
         resp = blank.replace('$$$',dest)
+        nexmo_call = "1"
     except:
         return HttpResponse('error')
-    print dest
     return HttpResponse(resp)
 
 
 @csrf_exempt
 def nexmo_error(request):
+    global nexmo_call
     print "Made it to my error "
+    nexmo_call = "0"
 
     if request.method != 'GET':
         return json_400_response(status='INVALID_METHOD')
@@ -484,9 +494,13 @@ def nexmo_error(request):
         print x,"  ",data[x]
     return HttpResponse(' error ')
 
+
+
 @csrf_exempt
 def nexmo_status(request):
+    global nexmo_call
     print "Made it to my status "
+    nexmo_call = "0"
 
     if request.method != 'GET':
         return json_400_response(status='INVALID_METHOD')
