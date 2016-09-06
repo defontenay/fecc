@@ -12,6 +12,7 @@ import pytz
 import time
 import warnings
 import threading
+from twilio.rest import TwilioRestClient
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from datetime import datetime, timedelta
 from settings import LOGFILE, STATIC_ROOT

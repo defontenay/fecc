@@ -358,6 +358,28 @@ def email(request):
 
 ###############################################################################
 
+@csrf_exempt
+def ifttt(request):
+    
+    log ("New request ","IFTTT")
+    
+    if request.method != 'POST':
+        return HttpResponse('Invalid method')
+
+    data = request.POST.copy()
+
+    one = data.get('value1',"empty")
+    two = data.get('value2',"empty")
+    three = data.get('value3',"empty")
+
+    log (one, "value1")
+    log (two, "value2")
+    log (three, "value3")
+
+    return HttpResponse('')
+
+###############################################################################
+
 
 
 def log(logdata,header):
