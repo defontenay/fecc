@@ -361,10 +361,12 @@ def email(request):
 @csrf_exempt
 def ifttt(request):
     
-    log ("New request ","IFTTT")
+    log ("New request ","IFTTT ")
     
     if request.method != 'POST':
         return HttpResponse('Invalid method')
+    
+    log (request.get_full_path(),"URL: ")
 
     data = request.POST.copy()
 
