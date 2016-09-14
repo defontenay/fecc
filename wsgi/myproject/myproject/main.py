@@ -382,8 +382,8 @@ def zapcal(request):
         return HttpResponse('Invalid method')
 
     data = request.POST.copy()
-
-    json_log (data, "DATA")
+    for x in data:
+        json_log (x, "DATA")
     
     return HttpResponse('Good ZAP')
 
