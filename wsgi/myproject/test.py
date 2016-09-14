@@ -10,6 +10,7 @@ import warnings
 headers = {'Content-type': 'application/json'}
 warnings.filterwarnings("ignore")
 url='http://127.0.0.1:8000/zapcal/email'
+url='http://fecc.starleaf.com/zapcal/email'
 web = {   "value1":"hello world", "V2":"Goodbye world"}
 session = requests.Session()
 
