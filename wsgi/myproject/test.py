@@ -9,8 +9,8 @@ import warnings
 
 headers = {'Content-type': 'application/json'}
 warnings.filterwarnings("ignore")
-url='http://127.0.0.1:8000/ifttt'
-web = {   "value1":"hello world"}
+url='http://127.0.0.1:8000/zapcal/email'
+web = {   "value1":"hello world", "V2":"Goodbye world"}
 session = requests.Session()
 
 print "calling...",url

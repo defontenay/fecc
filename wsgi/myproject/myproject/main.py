@@ -418,10 +418,11 @@ def json_log(logdata,header):
 def list_log(logdata):
     log = open(LOGFILE, 'a')
     log.write(str(datetime.datetime.now())+"--------------------\n")
-    log.write (header)
     for x in logdata:
         y = logdata.get(x,"---")
         log.write("key "+x+" data: "+y)
+        if "static" in LOGFILE:
+            print ("key "+x+" data: "+y)
     log.write("\n")
     log.close()
     return 0
