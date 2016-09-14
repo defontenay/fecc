@@ -420,7 +420,7 @@ def list_log(logdata):
     log.write(str(datetime.datetime.now())+"--------------------\n")
     log.write (header)
     for x in logdata:
-        y = logdata.get(x)
+        y = logdata.get(x,"---")
         log.write("key ",x," data: ",y)
     log.write("\n")
     log.close()
