@@ -382,8 +382,7 @@ def zapcal(request):
         return HttpResponse('Invalid method')
 
     data = request.POST.copy()
-    for x in data:
-        json_log (x, "DATA")
+    list_log (data)
     
     return HttpResponse('Good ZAP')
 
@@ -415,6 +414,17 @@ def json_log(logdata,header):
     log(string,header)
     return 0
 
+
+def list_log(logdata):
+    log = open(LOGFILE, 'a')
+    log.write(str(datetime.datetime.now())+"--------------------\n")
+    log.write (header)
+    for x in logdata:
+        y = logdata.get(x)
+        log.write("key ",x," data: ",y)
+    log.write("\n")
+    log.close()
+    return 0
 
 
 
