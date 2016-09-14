@@ -420,7 +420,7 @@ def list_log(logdata):
     log.write(str(datetime.datetime.now())+"-+------------------+-\n")
     for x in logdata:
         y = logdata.get(x,"---")
-        log.write("key "+x+" data: "+y"+\n")
+        log.write("key: "+x+" data: "+y+"\n")
         if "static" in LOGFILE:
             print ("key "+x+" data: "+y)
     log.write("\n")
