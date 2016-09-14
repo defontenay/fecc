@@ -368,9 +368,24 @@ def ifttt(request):
 
     data = request.POST.copy()
 
-    json_log (data, "DATA")
-
+json_log (data, "DATA")
+    
     return HttpResponse('')
+###############################################################################
+
+@csrf_exempt
+def zapcal(request):
+    
+    log (request.get_full_path(), "ZAPIER ")
+    
+    if request.method != 'POST':
+        return HttpResponse('Invalid method')
+
+    data = request.POST.copy()
+
+    json_log (data, "DATA")
+    
+    return HttpResponse('Good ZAP')
 
 ###############################################################################
 
