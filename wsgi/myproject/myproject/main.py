@@ -368,7 +368,7 @@ def ifttt(request):
 
     data = request.POST.copy()
 
-json_log (data, "DATA")
+    json_log (data, "DATA")
     
     return HttpResponse('')
 ###############################################################################
