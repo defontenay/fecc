@@ -145,8 +145,6 @@ def serve_blank(request):
 
 def getBlueJeansURI(description):
     match = re.search('Enter Meeting ID: ([0-9]{9,18}?)\s', description)
-    print "description ",match
-    print description
     if not match:
         return None
     return match.group(1) + '@bjn.vc'
@@ -173,15 +171,17 @@ def getGenericURI(description):
 
 #Skype Meeting<https://meet.lync.com/starleaf1/william.macdonald/03ZIU1XF>
 
-def getLyncURI(description,email):
-    match = re.search('[a-zA-Z0-9-.+_]{4,64}@([a-zA-Z0-9-.]{0,62}?)',email)
+def getLyncURI(description):
+    print "looking in ", description
+    match = re.search('https://([a-z0-9.\-]+)/[[a-z0-9]*/]*([a-z0-9.]*)/([A-Z0-9]*)', description)
+    print "match done"
     if not match:
+        print "none"
         return None
-    dom = match.group(1)
-    return None
-#    match = re.search('Meeting<https://meet.lync.com/[a-zA-Z0-9-._]{0,62}/([a-zA-Z0-9-._]{0,62})/[a-zA-Z0-9-._]{0,16})>',description)
-
-
+    dom  = match.group(1)
+    user = match.group(2)
+    conf = match.group(3)
+    return conf+"+"+user+"+"+dom+"@cloud.sl"
 
 def getTimezone(timezone):
     if timezone == 'GMT':
@@ -367,23 +367,86 @@ def ifttt(request):
         return HttpResponse('Invalid method')
 
     data = request.POST.copy()
-
-    json_log (data, "DATA")
     
     return HttpResponse('')
 ###############################################################################
 
+def my_get (data,f1,f2):
+    x = data.get(f1,None)
+    if not x:
+        x= data.get(f2,None)
+    return x
+
 @csrf_exempt
 def zapcal(request):
     
-    log (request.get_full_path(), "ZAPIER ")
+    path = request.get_full_path()
+    log (path, "ZAPIER ")
     
     if request.method != 'POST':
         return HttpResponse('Invalid method')
 
+    match = re.search('([a-zA-Z0-9-.+_]{4,64}@[a-zA-Z0-9-.]{0,99})', path)
+    if not match:
+        log ("No from address","RETURN")
+        return HttpResponse("no email in URL")
+
     data = request.POST.copy()
-    list_log (data)
+
+    tz = getTimezone(data.get("StartTimeZone","UTC"))
+    start = my_get(data,"start__dateTime","Start")
+    end = my_get(data,"end__dateTime","End")
+    title = my_get(data,"summary","Subject")
+    uid = my_get(data,"iCalUId","iCalUIdD")
+    description = my_get(data,"description","Body__Content")
+
+    if not start or not end or not title or not description or not uid:
+        list_log (data)
+        return HttpResponse("missing field")
+
+    uri = None
+    if "bluejeans" in description:
+        uri = getBlueJeansURI(description)
+    if not uri and "webex" in description:
+        uri = getWebexURI(description)
+    if not uri:
+        if "lync" in description or "online meeting" in description:
+            uri = getLyncURI(description)
+    if not uri:
+        uri = getGenericURI(description )
     
+    if not uri:
+        list_log (data)
+        return HttpResponse('no URI found')
+                 
+    participants = []
+    email = match.group(1)
+    newu = {'email':email}
+    participants.append ( newu )
+                 
+    settings = {
+                 'title':title,
+                 'permanent': False,
+                 'participants': participants,
+                 'timezone': tz,
+                 'start': start,
+                 'end': end,
+                 'uri': uri,
+                 }
+    json_log(settings,"SL-SETTINGS")
+
+    return HttpResponse('READY')
+
+    star = StarLeafClient(username=username,password=password,apiServer=apiServer)
+    star.authenticate()
+    x = star.getConf(uid)
+
+    if x:
+        star.createGreenButton(settings,uid)
+    else:
+        star.deleteGreenButton(uid)
+        star.createGreenButton(settings,uid)
+
     return HttpResponse('Good ZAP')
 
 ###############################################################################
