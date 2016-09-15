@@ -435,8 +435,6 @@ def zapcal(request):
                  }
     json_log(settings,"SL-SETTINGS")
 
-    return HttpResponse('READY')
-
     star = StarLeafClient(username=username,password=password,apiServer=apiServer)
     star.authenticate()
     x = star.getConf(uid)

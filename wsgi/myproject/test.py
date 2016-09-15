@@ -10,7 +10,7 @@ import warnings
 headers = {'Content-type': 'application/json'}
 warnings.filterwarnings("ignore")
 url='http://127.0.0.1:8000/zapcal/email@test.com'
-#url='http://fecc.starleaf.com/zapcal/email'
+url='http://fecc.starleaf.com/zapcal/email@fred.com'
 web = { \
     "end__dateTime":'2016-09-14T02:00:00-07:00', \
     "Subject":'Wills New Meeting',\
