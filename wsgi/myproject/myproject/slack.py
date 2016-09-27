@@ -88,7 +88,6 @@ def page(data):
 def global_delete(gl_name):
     all= Global.objects.all()
     for x in all:
-        print "multiple found ",x.name," to be ",x.value
         gl.delete()
 
 def get_global_value(gl_name):
@@ -102,9 +101,6 @@ def get_global_value(gl_name):
         gl = Global (name=gl_name, value=".")
         gl.save()
 
-    else:
-        print "get found ",gl.name," to be ",gl.value
-
     return gl.value
 
 
@@ -117,7 +113,6 @@ def set_global_value(gl_name, gl_value):
 
     except ObjectDoesNotExist:
         gl = Global (name=gl_name, value=gl_value)
-        print "set new. ",gl.name," to be ",gl.value
 
     gl.value = gl_value
     gl.save()

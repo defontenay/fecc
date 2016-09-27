@@ -360,16 +360,54 @@ def email(request):
 ###############################################################################
 
 @csrf_exempt
+def moxtra(request):
+    
+    log (request.get_full_path(), "Moxtra ")
+    
+    if request.method != 'POST':
+        log ("Not a POST", "Error ")
+        return HttpResponse('Invalid method')
+    
+    try:
+        data = json.loads(request.body)
+
+    except ValueError:
+        return HttpResponse('Bad JSON ')
+
+    json_log(data,"DATA")
+
+    url = data.get("callback_url","none")
+    if url is "none":
+        log ("No callback url", "Error ")
+        return HttpResponse('No URL')
+    log (url,  "callback url is ")
+
+    comment = data.get("comment")
+    json_log(comment, " COM ")
+
+    text = comment.get('text')
+    log (text,"TEXT ")
+
+    if "/starleaf" in text:
+        session = requests.Session()
+        parms = json.dumps( {"text":"Your StarLeaf congfrence is getting scheduled now"} )
+        r = session.post(url,headers= {'Content-type': 'application/json'},data=parms)
+    
+    return HttpResponse('Done')
+
+###############################################################################
+@csrf_exempt
 def ifttt(request):
     
     log (request.get_full_path(), "IFTTT ")
     
     if request.method != 'POST':
         return HttpResponse('Invalid method')
-
+    
     data = request.POST.copy()
     
     return HttpResponse('')
+
 ###############################################################################
 
 def my_get (data,f1,f2):
@@ -378,6 +416,7 @@ def my_get (data,f1,f2):
         x= data.get(f2,None)
     return x
 
+###############################################################################
 @csrf_exempt
 def zapcal(request):
     
@@ -394,14 +433,15 @@ def zapcal(request):
 
     data = request.POST.copy()
 
-    tz = getTimezone(data.get("StartTimeZone","UTC"))
+    tz = getTimezone(my_get(data,"StartTimeZone","start__timeZone"))
     start = my_get(data,"start__dateTime","Start")
     end = my_get(data,"end__dateTime","End")
     title = my_get(data,"summary","Subject")
-    uid = my_get(data,"iCalUId","iCalUIdD")
+    uid = my_get(data,"iCalUId","iCalUID")
     description = my_get(data,"description","Body__Content")
 
     if not start or not end or not title or not description or not uid:
+        log ("incomplete fields","ERROR")
         list_log (data)
         return HttpResponse("missing field")
 
@@ -417,6 +457,7 @@ def zapcal(request):
         uri = getGenericURI(description )
     
     if not uri:
+        log ("no URI found","ERROR")
         list_log (data)
         return HttpResponse('no URI found')
                  

@@ -32,6 +32,7 @@ urlpatterns = [
                url(r'^hu', main.hu),
                url(r'^email', main.email),
                url(r'^zapcal', main.zapcal),
+               url(r'^moxtra', main.moxtra),
                url(r'^ifttt', main.ifttt),
                url(r'^nexmo_error', slack.nexmo_error),
                url(r'^nexmo_status', slack.nexmo_status),
