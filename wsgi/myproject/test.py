@@ -4,28 +4,27 @@ import time
 import json
 import warnings
 
-web=    \
-    {"message_id": "2889",
-    "message_type": "comment_posted",
-    "binder_id": "BAGUChIRH7P7eBdR9h9nyR5",
-    "callback_url": "https://api.moxtra.com/webhooks/CAEqBS8wcXkzehdCQUdVQ2hJUkg3UDdlQmRSOWg5bnlSNYABvBaQAxQ",
+web=   { \
+    "binder_id": "BG6Ln9jHMq0BOkieOaqA3E2",
+    "callback_url": "https://api.moxtra.com/webhooks/CAEqBVpkams3ehdCRzZMbjlqSE1xMEJPa2llT2FxQTNFMoABbJADFA",
     "event": {
-        "timestamp": "2016-04-25T23:17:10Z",
-            },
-    "user": {
-        "id": "Utkj3YC5BxRHCCaq9widP67",
-        "name": "Joe Smith"
-    },
-    "comment": {
-        "id": "2888",
-        "text": "what is a bot?",
-        "audio": "null",
-    },
-    "target": {
-        "id": "BAGUChIRH7P7eBdR9h9nyR5",
-        "object_type": "binder",
-} }
-
+        "comment": {
+            "audio": "null",
+            "id": "122",
+            "text": "not escalating"
+        },
+        "target": {
+            "id": "BG6Ln9jHMq0BOkieOaqA3E2",
+            "object_type": "binder"
+        },
+        "timestamp": "2016-09-27T22:33:30Z",
+        "user": {
+            "id": "U2A51fFhHquLLyNAGsh2pH4",
+            "name": "Hellene Garcia"
+    }    },
+    "message_id": "123",
+    "message_type": "comment_posted"
+}
 
 headers = {'Content-type': 'application/json'}
 warnings.filterwarnings("ignore")
@@ -56,3 +55,8 @@ if c == 500:
     exit()
 else:
     print 'Body text is:\n', t
+
+exit()
+
+
+

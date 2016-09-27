@@ -359,6 +359,10 @@ def email(request):
 
 ###############################################################################
 
+
+
+
+
 @csrf_exempt
 def moxtra(request):
     
@@ -382,11 +386,14 @@ def moxtra(request):
         return HttpResponse('No URL')
     log (url,  "callback url is ")
 
-    comment = data.get("comment")
-    json_log(comment, " COM ")
-
+    event = data.get("event")
+    comment = event.get("comment")
     text = comment.get('text')
-    log (text,"TEXT ")
+    user = event.get("user")
+    name = user.get('name')
+
+    log (name, "user ")
+    log (text, "says")
 
     if "/starleaf" in text:
         session = requests.Session()
