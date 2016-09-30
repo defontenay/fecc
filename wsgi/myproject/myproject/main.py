@@ -365,6 +365,14 @@ def email(request):
 
 @csrf_exempt
 def moxtra(request):
+
+    starleafConference = {'title': 'conf',
+    'description': 'This conference was created from Moxtra.',
+    'timezone': 'UTC',
+    'permanent': False,
+    'start': " ",
+    'end': " ",
+    'participants': [ ],   }
     
     log (request.get_full_path(), "Moxtra ")
     
@@ -395,11 +403,32 @@ def moxtra(request):
     log (name, "user ")
     log (text, "says")
 
+
+
     if "/starleaf" in text:
-        session = requests.Session()
-        parms = json.dumps( {"text":"Your StarLeaf congfrence is getting scheduled now"} )
+        star = StarLeafClient(username=username,password=password,apiServer=apiServer)
+        if not star.authenticate():
+            log ("sl failed to auth")
+            return HttpResponse('Error')
         r = session.post(url,headers= {'Content-type': 'application/json'},data=parms)
-    
+        starleafConference['title'] = user+" - Moxtra"                 # start building the conference
+        starleafConference['start'] = datetime.utcnow().isoformat()
+        starleafConference['end'] =  (datetime.utcnow() + timedelta(minutes=15)).isoformat()
+        json_log(starleafConference,"STARLEAF CREATE")
+
+        conf = star.createConf(starleafConference)
+        try:
+            dial = conf['dial_info']
+        except:
+            log("KILL failed to create SL conf","ERR")
+            return HttpResponse('Error')
+
+        json_log( dial, "CONF DETAILS")
+        confid = conf['dial_info']
+
+        session = requests.Session()
+        parms = json.dumps( {"text":"Please dial your StarLeaf Conference ..."+confid} )
+
     return HttpResponse('Done')
 
 ###############################################################################
