@@ -6,7 +6,7 @@ import warnings
 
 web=   { \
     "binder_id": "BG6Ln9jHMq0BOkieOaqA3E2",
-    "callback_url": "https://api.moxtra.com/webhooks/CAEqBVpkams3ehdCRzZMbjlqSE1xMEJPa2llT2FxQTNFMoABbJADFA",
+    "callback_url": "https://api.moxtra.com/webhooks/CAEqBWtGRldhehdCa2Z1NFVmQXBsSDNDYjFlSGFwVGlYM4ABDJADFA",
     "event": {
         "comment": {
             "audio": "null",
@@ -40,7 +40,11 @@ web3 = { \
     "StartTimeZone":'Pacific',\
     "description":' <font size="4"><span style="font-size:16pt"><a href="https://meet.lync.com/starleaf1/william.macdonald/3XZN1VDW" target="_blank">Join online meeting </a>'   }
 
+wrtc = "https://portal.starleaf.com/breezelinks/webrtc?alias=89965&version=v482&target=7033891&conf_id=89965_CONFID_fSVadbf71UFCShjQNwo%40starleaf.com"
 session = requests.Session()
+parms = json.dumps( {"url":"https://portal.starleaf.com/breezelinks/webrtc?alias=89965&version=v482&target=7033891&conf_id=89965_CONFID_fSVadbf71UFCShjQNwo%40starleaf.com"} )
+r = session.post("https://api.moxtra.com/webhooks/CAEqBWtGRldhehdCa2Z1NFVmQXBsSDNDYjFlSGFwVGlYM4ABDJADFA",headers= {'Content-type': 'application/json'},data=parms)
+exit()
 
 print "calling...",url
 args = json.dumps(web, sort_keys=True, indent=4, separators=(',', ': '))
@@ -51,7 +55,9 @@ t=r.text
 print 'Response code is:', c
 if c == 500:
     i = t.find('<div id="summary">')
-    print t[i:i+300]
+    print t[i-20:i+300]
+    i = t.find(' line ')
+    print "\n\n",t[i-10:i+15],"\n\n"
     exit()
 else:
     print 'Body text is:\n', t

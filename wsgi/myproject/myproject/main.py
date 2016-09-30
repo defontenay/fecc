@@ -359,7 +359,11 @@ def email(request):
 
 ###############################################################################
 
-
+join =      "<uid> has invited you to meet...\n"
+join +=     "- on video  dial <uri>\n"
+join +=     "- from a phone, dial USA:+1 888 998 5260\n"
+join +=     "-    and enter code *<conf-id>*\n"
+join +=     "- or in chrome click \n<url>\n"
 
 
 
@@ -378,7 +382,7 @@ def moxtra(request):
     
     if request.method != 'POST':
         log ("Not a POST", "Error ")
-        return HttpResponse('Invalid method')
+        return HttpResponse('GET received\nversion 3.0')
     
     try:
         data = json.loads(request.body)
@@ -404,30 +408,37 @@ def moxtra(request):
     log (text, "says")
 
 
-
     if "/starleaf" in text:
         star = StarLeafClient(username=username,password=password,apiServer=apiServer)
+        print "created"
         if not star.authenticate():
-            log ("sl failed to auth")
+            log ("sl failed to auth","SL")
             return HttpResponse('Error')
-        r = session.post(url,headers= {'Content-type': 'application/json'},data=parms)
-        starleafConference['title'] = user+" - Moxtra"                 # start building the conference
-        starleafConference['start'] = datetime.utcnow().isoformat()
-        starleafConference['end'] =  (datetime.utcnow() + timedelta(minutes=15)).isoformat()
+        print "authenticated"
+        starleafConference['title'] = name+" - Moxtra"                 # start building the conference
+        starleafConference['start'] = datetime.datetime.utcnow().isoformat()
+        starleafConference['end'] =  (datetime.datetime.utcnow() + datetime.timedelta(minutes=15)).isoformat()
         json_log(starleafConference,"STARLEAF CREATE")
 
+        print "creating"
         conf = star.createConf(starleafConference)
+        print "done"
         try:
             dial = conf['dial_info']
         except:
             log("KILL failed to create SL conf","ERR")
             return HttpResponse('Error')
 
-        json_log( dial, "CONF DETAILS")
-        confid = conf['dial_info']
+        res1 = join.replace("<uri>",dial['dial_standards'])
+        res2 = res1.replace("<conf-id>",dial['access_code_pstn'])
+        res3 = res2.replace("<url>",dial['dial_info_url'])
+        post = res3.replace("<uid>",name)
+
+        print post
 
         session = requests.Session()
-        parms = json.dumps( {"text":"Please dial your StarLeaf Conference ..."+confid} )
+        parms = json.dumps( {"text":post} )
+        r = session.post(url,headers= {'Content-type': 'application/json'},data=parms)
 
     return HttpResponse('Done')
 
