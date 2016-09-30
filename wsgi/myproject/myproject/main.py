@@ -431,7 +431,7 @@ def moxtra(request):
 
         res1 = join.replace("<uri>",dial['dial_standards'])
         res2 = res1.replace("<conf-id>",dial['access_code_pstn'])
-        res3 = res2.replace("<url>",dial['dial_info_url'])
+        res3 = res2.replace("<url>",dial['webrtc_link'])
         post = res3.replace("<uid>",name)
 
         print post
