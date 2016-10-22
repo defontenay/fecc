@@ -451,6 +451,7 @@ def ifttt(request):
     log (path, "IFTTT ")
     
     if request.method != 'POST':
+        log ('not',"POST")
         return HttpResponse('Invalid method')
     
 
@@ -463,6 +464,7 @@ def ifttt(request):
         data = json.loads(request.body)
     
     except ValueError:
+        log ("NOT", " JSON ")
         return HttpResponse('Bad JSON ')
 
     json_log(data,"DATA")
