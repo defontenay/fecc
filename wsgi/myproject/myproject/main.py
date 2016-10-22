@@ -445,13 +445,96 @@ def moxtra(request):
 ###############################################################################
 @csrf_exempt
 def ifttt(request):
-    
-    log (request.get_full_path(), "IFTTT ")
+
+    path = request.get_full_path()
+            
+    log (path, "IFTTT ")
     
     if request.method != 'POST':
         return HttpResponse('Invalid method')
     
-    data = request.POST.copy()
+
+    match = re.search('([a-zA-Z0-9-.+_]{4,64}@[a-zA-Z0-9-.]{0,99})', path)
+    if not match:
+        log ("No from address","RETURN")
+        return HttpResponse("no email in URL")
+
+    try:
+        data = json.loads(request.body)
+    
+    except ValueError:
+        return HttpResponse('Bad JSON ')
+
+    json_log(data,"DATA")
+
+
+
+    tz = getTimezone(my_get(data,"StartTimeZone","start__timeZone"))
+    start = my_get(data,"start__dateTime","Start")
+    end = my_get(data,"end__dateTime","End")
+    title = my_get(data,"summary","Subject")
+    uid = my_get(data,"iCalUId","iCalUID")
+    description = my_get(data,"description","Body__Content")
+    
+    if not start or not end or not title or not description or not uid:
+        log ("incomplete fields","ERROR")
+        list_log (data)
+        return HttpResponse("missing field")
+    
+    uri = None
+    if "bluejeans" in description:
+        uri = getBlueJeansURI(description)
+    if not uri and "webex" in description:
+        uri = getWebexURI(description)
+    if not uri:
+        if "lync" in description or "online meeting" in description:
+            uri = getLyncURI(description)
+    if not uri:
+        uri = getGenericURI(description )
+    
+    if not uri:
+        log ("no URI found","ERROR")
+        list_log (data)
+        return HttpResponse('no URI found')
+
+    participants = []
+    email = match.group(1)
+    newu = {'email':email}
+    participants.append ( newu )
+    
+    dtend = dateutil.parser.parse(end).replace(tzinfo=None).isoformat()
+    dtstart = dateutil.parser.parse(start).replace(tzinfo=None).isoformat()
+    
+    settings = {
+        'title':title,
+        'permanent': False,
+        'participants': participants,
+        'timezone': tz,
+        'start': dtstart,
+        'end': dtend,
+        'uri': uri,
+    }
+    json_log(settings,"SL-SETTINGS")
+
+    log (uid, "CONF ID ")
+    
+    star = StarLeafClient(username=username,password=password,apiServer=apiServer)
+    star.authenticate()
+    x = star.getConf(uid)
+    
+    if x is None or "error" in x:
+        star.createGreenButton(settings,uid)
+        print "Creating Green Button"
+        return HttpResponse('Conference Created')
+    
+    star.deleteGreenButton(uid)
+    print "Delete Existing"
+    x = my_get(data,"IsCancelled","fred")
+    if x is "False":
+        print "Resetting Green Button"
+        star.createGreenButton(settings,uid)
+    
+
     
     return HttpResponse('')
 

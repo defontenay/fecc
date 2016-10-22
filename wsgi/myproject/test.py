@@ -28,10 +28,10 @@ web=   { \
 
 headers = {'Content-type': 'application/json'}
 warnings.filterwarnings("ignore")
-url='http://127.0.0.1:8000/moxtra'
-#url='http://127.0.0.1:8000/zapcal/test@test.com'
-##url='http://fecc.starleaf.com/zapcal/will@starleaf.com'
-web3 = { \
+#url='http://127.0.0.1:8000/ifttt'
+url='http://127.0.0.1:8000/ifttt/test@test.com'
+#url='http://fecc.starleaf.com/ifttt/will@starleaf.com'
+web = { \
     "end__dateTime":'2016-09-17T15:30:00Z', \
     "Subject":'Wills New Meeting',\
     "start__dateTime":'2016-09-17T02:00:00-07:00',\
@@ -43,11 +43,10 @@ web3 = { \
 wrtc = "https://portal.starleaf.com/breezelinks/webrtc?alias=89965&version=v482&target=7033891&conf_id=89965_CONFID_fSVadbf71UFCShjQNwo%40starleaf.com"
 session = requests.Session()
 parms = json.dumps( {"url":"https://portal.starleaf.com/breezelinks/webrtc?alias=89965&version=v482&target=7033891&conf_id=89965_CONFID_fSVadbf71UFCShjQNwo%40starleaf.com"} )
-r = session.post("https://api.moxtra.com/webhooks/CAEqBWtGRldhehdCa2Z1NFVmQXBsSDNDYjFlSGFwVGlYM4ABDJADFA",headers= {'Content-type': 'application/json'},data=parms)
-exit()
+
 
 print "calling...",url
-args = json.dumps(web, sort_keys=True, indent=4, separators=(',', ': '))
+args = json.dumps(web)
 
 r = session.post(url,data=args, headers=headers, verify=False)
 c=r.status_code
