@@ -29,7 +29,7 @@ web=   { \
 headers = {'Content-type': 'application/json'}
 warnings.filterwarnings("ignore")
 #url='http://127.0.0.1:8000/ifttt'
-url='http://127.0.0.1:8000/ifttt/test@test.com'
+url='http://127.0.0.1:8000/ifttt/william.macdonald@starleaf.com/&my%20dexcription%20&October%2025,%202016%20at%2005:30PM%20&October%2025,%202016%20at%2006:30PM'
 #url='http://fecc.starleaf.com/ifttt/will@starleaf.com'
 web = { \
     "end__dateTime":'2016-09-17T15:30:00Z', \

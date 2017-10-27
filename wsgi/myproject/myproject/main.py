@@ -444,22 +444,25 @@ def moxtra(request):
 
 ###############################################################################
 @csrf_exempt
-def ifttt(request):
+def test(request,uri,one):
+    log (uri, "TEST ")
+    log (one, "ARG ")
+    return HttpResponse('doned')
+
+
+@csrf_exempt
+def ifttt(request,dn,domain):
 
     path = request.get_full_path()
             
     log (path, "IFTTT ")
+    log (path, "IFTTT ")
+    log (domain, "DN ")
     
     if request.method != 'POST':
         log ('not',"POST")
         return HttpResponse('Invalid method')
     
-
-    match = re.search('([a-zA-Z0-9-.+_]{4,64}@[a-zA-Z0-9-.]{0,99})', path)
-    if not match:
-        log ("No from address","RETURN")
-        return HttpResponse("no email in URL")
-
     try:
         data = json.loads(request.body)
     
